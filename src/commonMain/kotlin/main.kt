@@ -2,6 +2,8 @@ import com.soywiz.klock.milliseconds
 import com.soywiz.korev.Key
 import com.soywiz.korge.*
 import com.soywiz.korge.input.*
+import com.soywiz.korge.ui.UI_DEFAULT_WIDTH
+import com.soywiz.korge.ui.uiButton
 import com.soywiz.korge.view.*
 import com.soywiz.korim.bitmap.*
 import com.soywiz.korim.format.readBitmap
@@ -13,6 +15,7 @@ const val height = 512
 const val tileHeight = 32
 const val tileWidth = 32
 
+var control = true
 var startFrame = 0
 var dir = 0
 
@@ -67,7 +70,20 @@ suspend fun main() = Korge(
 		}
 	}
 
-	
+	val tableMap = resourcesVfs["table.png"].readBitmap()
+	val table = Image(tableMap).xy(-350, views.virtualHeight / 4)
+
+	container {
+		uiButton(
+			text = "Inventory"
+		) {
+			position(views.virtualWidth - UI_DEFAULT_WIDTH, 0.0)
+			onDown {
+				control = false
+				addChild(table)
+			}
+		}
+	}
 
 	person.onFrameChanged {
 		person.stopAnimation()
@@ -75,48 +91,64 @@ suspend fun main() = Korge(
 
 	keys {
 		down(Key.DOWN)  {
-			person.y += 10
-			person.playAnimation(
-				CharMoves.DOWN.animation,
-				startFrame = startFrame,
-				endFrame = startFrame
-			)
-			changeFrame()
-			dir = 0
+			if (control) {
+				person.y += 10
+				person.playAnimation(
+					CharMoves.DOWN.animation,
+					startFrame = startFrame,
+					endFrame = startFrame
+				)
+				changeFrame()
+				dir = 0
+			}
 		}
-		down(Key.UP)    {
-			person.y -= 10
-			person.playAnimation(
-				CharMoves.UP.animation,
-				startFrame = startFrame,
-				endFrame = startFrame
-			)
-			changeFrame()
-			dir = 1
+		down(Key.UP) {
+			if (control) {
+				person.y -= 10
+				person.playAnimation(
+					CharMoves.UP.animation,
+					startFrame = startFrame,
+					endFrame = startFrame
+				)
+				changeFrame()
+				dir = 1
+			}
 		}
 		down(Key.LEFT)  {
-			person.x -= 10
-			person.playAnimation(
-				CharMoves.LEFT.animation,
-				startFrame = startFrame,
-				endFrame = startFrame
-			)
-			changeFrame()
-			dir = 3
+			if (control) {
+				person.x -= 10
+				person.playAnimation(
+					CharMoves.LEFT.animation,
+					startFrame = startFrame,
+					endFrame = startFrame
+				)
+				changeFrame()
+				dir = 3
+			}
 		}
 		down(Key.RIGHT) {
-			person.x += 10
-			person.playAnimation(
-				CharMoves.RIGHT.animation,
-				startFrame = startFrame,
-				endFrame = startFrame
-			)
-			changeFrame()
-			dir = 2
+			if (control) {
+				person.x += 10
+				person.playAnimation(
+					CharMoves.RIGHT.animation,
+					startFrame = startFrame,
+					endFrame = startFrame
+				)
+				changeFrame()
+				dir = 2
+			}
 		}
 		down(Key.X) {
-			person.playAnimation(CharMoves.SIT.animation, 200.milliseconds, startFrame = dir, endFrame = dir)
-			person.stopAnimation()
+			if (control) {
+				person.playAnimation(CharMoves.SIT.animation, 200.milliseconds, startFrame = dir, endFrame = dir)
+				person.stopAnimation()
+			}
+		}
+		down(Key.ESCAPE) {
+			if (!control) {
+				table.removeFromParent()
+				control = true
+			}
 		}
 	}
 }
