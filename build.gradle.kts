@@ -18,6 +18,7 @@ apply<KorgeGradlePlugin>()
 
 korge {
 	id = "com.example.example"
+	jvmMainClassName = "MainKt"
 // To enable all targets at once
 
 	//targetAll()

@@ -2,10 +2,12 @@ import com.soywiz.klock.milliseconds
 import com.soywiz.korev.Key
 import com.soywiz.korge.*
 import com.soywiz.korge.input.*
-import com.soywiz.korge.ui.UI_DEFAULT_WIDTH
-import com.soywiz.korge.ui.uiButton
+import com.soywiz.korge.time.delay
+import com.soywiz.korge.ui.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.bitmap.*
+import com.soywiz.korim.color.Colors
+import com.soywiz.korim.color.RGBA
 import com.soywiz.korim.format.readBitmap
 import com.soywiz.korio.file.std.resourcesVfs
 import com.soywiz.korma.geom.RectangleInt
@@ -25,7 +27,7 @@ suspend fun main() = Korge(
 ) {
 	init()
 
-	val map = ArrayList<Pic>()
+	/*val map = ArrayList<Pic>()
 	for (i in 0..15) {
 		for (j in 0..15) {
 			map.add(Pic(tileHeight * j * 1.0, tileWidth * i * 1.0, TileType.GROUND))
@@ -37,6 +39,18 @@ suspend fun main() = Korge(
 			image(it.getPic()) {
 				x = it.x
 				y = it.y
+			}
+		}
+	}*/
+
+	graphics {
+		for (i in 0..15) {
+			for (j in 0..15) {
+				val pic = Pic(tileHeight * j * 1.0, tileWidth * i * 1.0, TileType.GROUND)
+				image(pic.getPic()) {
+					x = pic.x
+					y = pic.y
+				}
 			}
 		}
 	}
@@ -71,17 +85,56 @@ suspend fun main() = Korge(
 	}
 
 	val tableMap = resourcesVfs["table.png"].readBitmap()
-	val table = Image(tableMap).xy(-350, views.virtualHeight / 4)
 
-	container {
-		uiButton(
-			text = "Inventory"
-		) {
-			position(views.virtualWidth - UI_DEFAULT_WIDTH, 0.0)
-			onDown {
-				control = false
-				addChild(table)
+	val inventoryContainer = Container().xy(0, 0)
+	inventoryContainer.addChild(
+		roundRect(views.virtualWidth, views.virtualHeight, 0) {
+			color = RGBA(0x00, 0x00, 0x00, 0x88)
+		}
+	)
+	inventoryContainer.addChild(image(tableMap) {
+		scale(1.2, 1.4)
+		centerXOn(this@Korge)
+		centerYOn(this@Korge)
+		text("")
+	})
+	inventoryContainer.addChild(uiProgressBar {
+		position(centerOn(inventoryContainer))
+		onDown {
+			for (i in 0..100) {
+				ratio = i * 0.01
+				this.updateState()
+				delay(50.milliseconds)
 			}
+			if (ratio == 1.0) {
+				println("true")
+				uiText("You are awesome!!!"){
+					xy(100, 100)
+					this.textColor = Colors.BLACK
+				}
+			}
+		}
+	})
+	inventoryContainer.addChild(uiCheckBox {
+		alignTopToTopOf(inventoryContainer, tableMap.height / 5 * 3)
+		centerXOn(inventoryContainer)
+		text = "You are awesome?"
+		textColor = Colors.DARKBLUE
+		onClick {
+			if (checked) {
+				println("Yea, you are!")
+			}
+		}
+	})
+
+
+	uiButton(
+		text = "Inventory"
+	) {
+		position(views.virtualWidth - UI_DEFAULT_WIDTH, 0.0)
+		onDown {
+			control = false
+			inventoryContainer.addTo(this@Korge)
 		}
 	}
 
@@ -92,7 +145,6 @@ suspend fun main() = Korge(
 	keys {
 		down(Key.DOWN)  {
 			if (control) {
-				person.y += 10
 				person.playAnimation(
 					CharMoves.DOWN.animation,
 					startFrame = startFrame,
@@ -100,11 +152,11 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 0
+				person.y += 10
 			}
 		}
 		down(Key.UP) {
 			if (control) {
-				person.y -= 10
 				person.playAnimation(
 					CharMoves.UP.animation,
 					startFrame = startFrame,
@@ -112,11 +164,11 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 1
+				person.y -= 10
 			}
 		}
 		down(Key.LEFT)  {
 			if (control) {
-				person.x -= 10
 				person.playAnimation(
 					CharMoves.LEFT.animation,
 					startFrame = startFrame,
@@ -124,11 +176,11 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 3
+				person.x -= 10
 			}
 		}
 		down(Key.RIGHT) {
 			if (control) {
-				person.x += 10
 				person.playAnimation(
 					CharMoves.RIGHT.animation,
 					startFrame = startFrame,
@@ -136,6 +188,7 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 2
+				person.x += 10
 			}
 		}
 		down(Key.X) {
@@ -146,7 +199,7 @@ suspend fun main() = Korge(
 		}
 		down(Key.ESCAPE) {
 			if (!control) {
-				table.removeFromParent()
+				inventoryContainer.removeFromParent()
 				control = true
 			}
 		}
