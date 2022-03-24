@@ -11,6 +11,8 @@ import com.soywiz.korim.color.RGBA
 import com.soywiz.korim.format.readBitmap
 import com.soywiz.korio.file.std.resourcesVfs
 import com.soywiz.korma.geom.RectangleInt
+import com.soywiz.korma.geom.abs
+import kotlin.math.abs
 
 const val width = 512
 const val height = 512
@@ -22,8 +24,7 @@ var startFrame = 0
 var dir = 0
 
 suspend fun main() = Korge(
-	width = width,
-	height = height
+	fullscreen = true
 ) {
 	init()
 
@@ -44,8 +45,8 @@ suspend fun main() = Korge(
 	}*/
 
 	graphics {
-		for (i in 0..15) {
-			for (j in 0..15) {
+		for (i in 0..30) {
+			for (j in 0..60) {
 				val pic = Pic(tileHeight * j * 1.0, tileWidth * i * 1.0, TileType.GROUND)
 				image(pic.getPic()) {
 					x = pic.x
@@ -92,40 +93,90 @@ suspend fun main() = Korge(
 			color = RGBA(0x00, 0x00, 0x00, 0x88)
 		}
 	)
+//	inventoryContainer.addChild(
+//		roundRect(100, 100, 0) {
+//			color = RGBA(255, 0x00, 0x00, 0x88)
+//			position(centerOn(inventoryContainer))
+//		}
+//	)
 	inventoryContainer.addChild(image(tableMap) {
-		scale(1.2, 1.4)
+		scale(2.5, 2.2)
 		centerXOn(this@Korge)
 		centerYOn(this@Korge)
 		text("")
 	})
-	inventoryContainer.addChild(uiProgressBar {//mega harosh
-		position(centerOn(inventoryContainer))
-		onDown {
-			for (i in 0..100) {
-				ratio = i * 0.01
-				this.updateState()
-				delay(50.milliseconds)
-			}
-			if (ratio == 1.0) {
-				println("true")
-				uiText("You are awesome!!!"){
-					xy(100, 100)
-					this.textColor = Colors.BLACK
+	for(i in 0..2){
+		for(j in 0..6){
+			inventoryContainer.addChild(
+				roundRect(100, 100, 20) {
+					color = RGBA(0x210, 0x210, 0x170, 0x88)
+					position(260 + 110*j, 190 + 110*i)
 				}
+			)
+		}
+	}
+	val groundContainer = Container()
+	val sword = resourcesVfs["sword.png"].readBitmap()
+	groundContainer.addChild(
+	image(sword) {
+		position(
+			100,100
+		)
+	})
+	groundContainer.addTo(this@Korge)
+
+	val Sword: Things = Things(100, 100)
+
+	val buttonGetBitmap = resourcesVfs["button.png"].readBitmap()
+	image(buttonBitmap) {
+		position(
+			views.virtualWidth  - buttonBitmap.width  * 1.5,
+			views.virtualHeight - buttonBitmap.height * 1.5 - 100
+		)
+		onDown {
+			if((abs(Sword.xPos - person.x) < 100) && (abs(Sword.yPos - person.y) < 100)){
+				//do
+				removeChild(groundContainer)
+
+				inventoryContainer.addChild(image(sword){
+					position(centerOn(inventoryContainer))
+				})
+
+
+				//do
 			}
 		}
-	})
-	inventoryContainer.addChild(uiCheckBox {
-		alignTopToTopOf(inventoryContainer, tableMap.height / 5 * 3)
-		centerXOn(inventoryContainer)
-		text = "You are awesome?"
-		textColor = Colors.DARKBLUE
-		onClick {
-			if (checked) {
-				println("Yea, you are!")
-			}
-		}
-	})
+	}
+
+//	inventoryContainer.addChild(uiProgressBar {//mega harosh
+//		position(centerOn(inventoryContainer))
+//		onDown {
+//			for (i in 0..100) {
+//				ratio = i * 0.01
+//				this.updateState()
+//				delay(50.milliseconds)
+//			}
+//			if (ratio == 1.0) {
+//				println("true")
+//				uiText("You are awesome!!!"){
+//					xy(10, 10)
+//					this.textColor = Colors.BLACK
+//				}
+//			}
+//		}
+//	})
+
+//	inventoryContainer.addChild(uiCheckBox {
+//		alignTopToTopOf(inventoryContainer, tableMap.height / 5 * 3)
+//		centerXOn(inventoryContainer)
+//		text = "You are awesome?"
+//		textColor = Colors.DARKBLUE
+//		onClick {
+//			if (checked) {
+//				println("Yea, you are!")
+//			}
+//		}
+//	})
 
 
 	uiButton(
