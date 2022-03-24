@@ -98,7 +98,7 @@ suspend fun main() = Korge(
 		centerYOn(this@Korge)
 		text("")
 	})
-	inventoryContainer.addChild(uiProgressBar {
+	inventoryContainer.addChild(uiProgressBar {//mega harosh
 		position(centerOn(inventoryContainer))
 		onDown {
 			for (i in 0..100) {
