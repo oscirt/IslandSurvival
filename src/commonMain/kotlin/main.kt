@@ -2,22 +2,18 @@ import com.soywiz.klock.milliseconds
 import com.soywiz.korev.Key
 import com.soywiz.korge.*
 import com.soywiz.korge.input.*
-import com.soywiz.korge.time.delay
 import com.soywiz.korge.ui.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.bitmap.*
-import com.soywiz.korim.color.Colors
 import com.soywiz.korim.color.RGBA
 import com.soywiz.korim.format.readBitmap
 import com.soywiz.korio.file.std.resourcesVfs
 import com.soywiz.korma.geom.RectangleInt
-import com.soywiz.korma.geom.abs
 import kotlin.math.abs
 
-const val width = 512
-const val height = 512
 const val tileHeight = 32
 const val tileWidth = 32
+const val inventoryCell = 100
 
 var control = true
 var startFrame = 0
@@ -29,6 +25,8 @@ suspend fun main() = Korge(
 ) {
 	init()
 
+
+	//земля
 	val ground = container {
 		for (i in 0..30) {
 			for (j in 0..60) {
@@ -41,9 +39,13 @@ suspend fun main() = Korge(
 		}
 	}
 
+
+	//персонаж
 	val spriteMap = resourcesVfs["char.png"].readBitmap()
 	val person = sprite(spriteMap.slice(RectangleInt(10, 0, 100, 100))).centerOn(this)
 
+
+	//геймпад
 	val joystickBitmap = resourcesVfs["Controls.png"].readBitmap()
 	image(joystickBitmap) {
 		position(0.0, views.virtualHeightDouble - joystickBitmap.height + 1)
@@ -58,6 +60,8 @@ suspend fun main() = Korge(
 		}
 	}
 
+
+	//сидеть
 	val buttonBitmap = resourcesVfs["button.png"].readBitmap()
 	image(buttonBitmap) {
 		position(
@@ -70,70 +74,90 @@ suspend fun main() = Korge(
 		}
 	}
 
-	val tableMap = resourcesVfs["table.png"].readBitmap()
 
+	//инвентарь
+	val tableImg = Image(resourcesVfs["table.png"].readBitmap()).scale(2.5, 2.2).centerOn(this@Korge)
 	val inventoryContainer = Container().xy(0, 0)
 	inventoryContainer.addChild(
 		roundRect(views.virtualWidth, views.virtualHeight, 0) {
 			color = RGBA(0x00, 0x00, 0x00, 0x88)
 		}
 	)
-//	inventoryContainer.addChild(
-//		roundRect(100, 100, 0) {
-//			color = RGBA(255, 0x00, 0x00, 0x88)
-//			position(centerOn(inventoryContainer))
-//		}
-//	)
-	inventoryContainer.addChild(image(tableMap) {
-		scale(2.5, 2.2)
-		centerXOn(this@Korge)
-		centerYOn(this@Korge)
-		text("")
-	})
-	for(i in 0..2){
-		for(j in 0..6){
-			inventoryContainer.addChild(
-				roundRect(100, 100, 20) {
-					color = RGBA(0x210, 0x210, 0x170, 0x88)
-					position(260 + 110*j, 190 + 110*i)
-				}
-			)
+	inventoryContainer.addChild(tableImg)
+
+
+	//заполнение инвентаря
+	//вынести в отдельный файл
+	//вынес
+	val inventory = Inventory(arrayListOf(), 3, 7)
+	for(i in 0 until inventory.rows){
+		inventory.array.add(arrayListOf())
+		for(j in 0 until inventory.cols) {
+			inventory.array[i].add(InventoryCell(cell = roundRect(100.0, 100.0, 20.0) {
+				color = RGBA(0x210, 0x210, 0x170, 0x88)
+				x += (j * (inventoryCell + 20)) + 540
+				y += (i * (inventoryCell  +20)) + 290
+			}))
+			inventoryContainer.addChild(inventory.array[i][j].cell)
 		}
 	}
-	val groundContainer = Container()
-	val swordBitmap = resourcesVfs["sword.png"].readBitmap()
-	ground.addChild(image(swordBitmap) {
-		position(
-			views.virtualWidth/2 + 50,
-			views.virtualHeight/2 + 50
-		)
-	})
-	groundContainer.addTo(this@Korge)
 
-	val Sword = Things(views.virtualWidth/2 + 50, views.virtualHeight/2 + 50, swordBitmap)
 
-	val buttonGetBitmap = resourcesVfs["button.png"].readBitmap()
+	//мечики
+	val sword = Thing(
+		Image(resourcesVfs["sword.png"].readBitmap())
+			.position(views.virtualWidth/2 + 100, views.virtualHeight/2 + 100))
+	ground.addChild(sword.img)
+	val sword2 = Thing(
+		Image(resourcesVfs["sword.png"].readBitmap())
+			.position(views.virtualWidth/2 - 100, views.virtualHeight/2 - 100))
+	ground.addChild(sword2.img)
+
+
+	//кнопка взятия предмета(меча, который на самом деле КИРКА)
+	resourcesVfs["button.png"].readBitmap()
 	image(buttonBitmap) {
 		position(
 			views.virtualWidth  - buttonBitmap.width  * 1.5,
 			views.virtualHeight - buttonBitmap.height * 1.5 - 100
 		)
 		onDown {
-			
-			if((abs(Sword.xPos - person.x) < 100) && (abs(Sword.yPos - person.y) < 100)){
-				//do
-				removeChild(groundContainer)
-
-				inventoryContainer.addChild(image(swordBitmap){
-					position(centerOn(inventoryContainer))
-				})
-
-
-				//do
+			//не нравится куча выражений
+			//жестко надо переработать
+			if((abs(sword.img.globalX - person.x) < 100) && (abs(sword.img.globalY - person.y) < 100)) {
+				ground.removeChild(sword.img)
+				val index = inventory.getFreeCellIndex()
+				val i = index / 3
+				val j = index % 7
+				if (index != -1) {
+					//rows and cols need to be changed
+					inventory.array[i][j].thing = sword
+					inventoryContainer.addChild(
+						inventory.array[i][j].thing!!.img.xy((j * (inventoryCell + 20)) + 574, ((i * (inventoryCell + 20)) + 324))
+					)
+				}
+			}
+			if ((abs(sword2.img.globalX - person.x) < 100) && (abs(sword2.img.globalY - person.y) < 100)) {
+				ground.removeChild(sword2.img)
+				val index = inventory.getFreeCellIndex()
+				val i = index / 3
+				val j = index % 7
+				if (index != -1) {
+					//rows and cols need to be changed
+					inventory.array[i][j].thing = sword2
+					inventoryContainer.addChild(
+						inventory.array[i][j].thing!!.img.xy(
+							(j * (inventoryCell + 20)) + 574,
+							((i * (inventoryCell + 20)) + 324)
+						)
+					)
+				}
 			}
 		}
 	}
 
+
+	//кнопка инвентаря
 	uiButton(
 		text = "Inventory"
 	) {
@@ -144,10 +168,14 @@ suspend fun main() = Korge(
 		}
 	}
 
+
+	//чето связанное с анимацией хз че это но работает не трогай пж
 	person.onFrameChanged {
 		person.stopAnimation()
 	}
 
+
+	//привязка ко кнопкам клавиатуры
 	keys {
 		down(Key.DOWN)  {
 			if (control) {
@@ -158,7 +186,6 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 0
-//				person.y += 10
 				ground.y -= 10
 			}
 		}
@@ -171,7 +198,6 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 1
-//				person.y -= 10
 				ground.y += 10
 			}
 		}
@@ -184,7 +210,6 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 3
-//				person.x -= 10
 				ground.x += 10
 			}
 		}
@@ -197,7 +222,6 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 2
-//				person.x += 10
 				ground.x -= 10
 			}
 		}
