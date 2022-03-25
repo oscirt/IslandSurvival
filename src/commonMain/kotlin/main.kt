@@ -24,7 +24,8 @@ var startFrame = 0
 var dir = 0
 
 suspend fun main() = Korge(
-	fullscreen = true
+	width = 60 * tileWidth,
+	height = 30 * tileHeight
 ) {
 	init()
 
@@ -44,7 +45,7 @@ suspend fun main() = Korge(
 		}
 	}*/
 
-	graphics {
+	val ground = container {
 		for (i in 0..30) {
 			for (j in 0..60) {
 				val pic = Pic(tileHeight * j * 1.0, tileWidth * i * 1.0, TileType.GROUND)
@@ -57,7 +58,7 @@ suspend fun main() = Korge(
 	}
 
 	val spriteMap = resourcesVfs["char.png"].readBitmap()
-	val person = sprite(spriteMap.slice(RectangleInt(10, 0, 100, 100)))
+	val person = sprite(spriteMap.slice(RectangleInt(10, 0, 100, 100))).centerOn(this)
 
 	val joystickBitmap = resourcesVfs["Controls.png"].readBitmap()
 	image(joystickBitmap) {
@@ -116,16 +117,16 @@ suspend fun main() = Korge(
 		}
 	}
 	val groundContainer = Container()
-	val sword = resourcesVfs["sword.png"].readBitmap()
-	groundContainer.addChild(
-	image(sword) {
+	val swordBitmap = resourcesVfs["sword.png"].readBitmap()
+	ground.addChild(image(swordBitmap) {
 		position(
-			100,100
+			views.virtualWidth/2 + 50,
+			views.virtualHeight/2 + 50
 		)
 	})
 	groundContainer.addTo(this@Korge)
 
-	val Sword: Things = Things(100, 100)
+	val Sword = Things(views.virtualWidth/2 + 50, views.virtualHeight/2 + 50, swordBitmap)
 
 	val buttonGetBitmap = resourcesVfs["button.png"].readBitmap()
 	image(buttonBitmap) {
@@ -134,11 +135,12 @@ suspend fun main() = Korge(
 			views.virtualHeight - buttonBitmap.height * 1.5 - 100
 		)
 		onDown {
+			
 			if((abs(Sword.xPos - person.x) < 100) && (abs(Sword.yPos - person.y) < 100)){
 				//do
 				removeChild(groundContainer)
 
-				inventoryContainer.addChild(image(sword){
+				inventoryContainer.addChild(image(swordBitmap){
 					position(centerOn(inventoryContainer))
 				})
 
@@ -203,7 +205,8 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 0
-				person.y += 10
+//				person.y += 10
+				ground.y -= 10
 			}
 		}
 		down(Key.UP) {
@@ -215,7 +218,8 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 1
-				person.y -= 10
+//				person.y -= 10
+				ground.y += 10
 			}
 		}
 		down(Key.LEFT)  {
@@ -227,7 +231,8 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 3
-				person.x -= 10
+//				person.x -= 10
+				ground.x += 10
 			}
 		}
 		down(Key.RIGHT) {
@@ -239,7 +244,8 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 2
-				person.x += 10
+//				person.x += 10
+				ground.x -= 10
 			}
 		}
 		down(Key.X) {
