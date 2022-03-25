@@ -29,22 +29,6 @@ suspend fun main() = Korge(
 ) {
 	init()
 
-	/*val map = ArrayList<Pic>()
-	for (i in 0..15) {
-		for (j in 0..15) {
-			map.add(Pic(tileHeight * j * 1.0, tileWidth * i * 1.0, TileType.GROUND))
-		}
-	}
-
-	container {
-		map.forEach {
-			image(it.getPic()) {
-				x = it.x
-				y = it.y
-			}
-		}
-	}*/
-
 	val ground = container {
 		for (i in 0..30) {
 			for (j in 0..60) {
@@ -149,37 +133,6 @@ suspend fun main() = Korge(
 			}
 		}
 	}
-
-//	inventoryContainer.addChild(uiProgressBar {//mega harosh
-//		position(centerOn(inventoryContainer))
-//		onDown {
-//			for (i in 0..100) {
-//				ratio = i * 0.01
-//				this.updateState()
-//				delay(50.milliseconds)
-//			}
-//			if (ratio == 1.0) {
-//				println("true")
-//				uiText("You are awesome!!!"){
-//					xy(10, 10)
-//					this.textColor = Colors.BLACK
-//				}
-//			}
-//		}
-//	})
-
-//	inventoryContainer.addChild(uiCheckBox {
-//		alignTopToTopOf(inventoryContainer, tableMap.height / 5 * 3)
-//		centerXOn(inventoryContainer)
-//		text = "You are awesome?"
-//		textColor = Colors.DARKBLUE
-//		onClick {
-//			if (checked) {
-//				println("Yea, you are!")
-//			}
-//		}
-//	})
-
 
 	uiButton(
 		text = "Inventory"
