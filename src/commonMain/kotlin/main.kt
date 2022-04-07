@@ -26,7 +26,7 @@ suspend fun main() = Korge(
 ) {
 	init()
 
-	val ground = Container()
+	val ground = Container().xy(-16, -16)
 	addChild(ground)
 
 	//земля
@@ -181,7 +181,6 @@ suspend fun main() = Korge(
 	keys {
 		down(Key.DOWN)  {
 			if (control) {
-
 				person.playAnimation(
 					CharMoves.DOWN.animation,
 					startFrame = startFrame,
@@ -189,7 +188,7 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 0
-				ground.y -= 10
+				ground.y -= 32
 			}
 		}
 		down(Key.UP) {
@@ -201,7 +200,7 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 1
-				ground.y += 10
+				ground.y += 32
 			}
 		}
 		down(Key.LEFT)  {
@@ -213,7 +212,7 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 3
-				ground.x += 10
+				ground.x += 32
 			}
 		}
 		down(Key.RIGHT) {
@@ -225,7 +224,7 @@ suspend fun main() = Korge(
 				)
 				changeFrame()
 				dir = 2
-				ground.x -= 10
+				ground.x -= 32
 			}
 		}
 		down(Key.X) {
