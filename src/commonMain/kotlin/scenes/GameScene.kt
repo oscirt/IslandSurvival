@@ -17,6 +17,7 @@ import com.soywiz.korim.bitmap.BitmapSlice
 import com.soywiz.korim.bitmap.slice
 import com.soywiz.korim.color.RGBA
 import com.soywiz.korim.format.readBitmap
+import com.soywiz.korio.dynamic.KDynamic.Companion.str
 import com.soywiz.korio.file.std.resourcesVfs
 import com.soywiz.korma.geom.RectangleInt
 import world.TileType
@@ -33,25 +34,26 @@ class GameScene() : Scene() {
     override suspend fun Container.sceneInit() {
         init()
 
-        val cam = camera {}
-
-        val ground = Container()
-        ground.addTo(cam)
+        val ground = Container().xy(0, -8)
+        ground.addTo(this)
 
         //земля
         val world = World(ArrayList())
-        world.generateWorld(60, 30)
+        world.generateWorld(256, 256)
         world.array.forEach { array ->
             array.forEach { cell ->
                 cell.image.addTo(ground)
             }
         }
 
+        val cam = camera {}
+
 
         //персонаж
         val spriteMap = resourcesVfs["char.png"].readBitmap()
         val person = Sprite(spriteMap.slice(RectangleInt(10, 0, 100, 100))).centerOn(this@sceneInit)
         person.addTo(cam)
+        println("${person.x}|${person.y}||${person.width}|${person.height}")
 
 //        addUpdater {
 //            cam.x += 1
@@ -208,6 +210,7 @@ class GameScene() : Scene() {
         keys {
             down(Key.DOWN) {
                 if (control) {
+                    println(if (getTile(world, person) == TileType.GROUND) 1 else 2)
                     person.playAnimation(
                         CharMoves.DOWN.animation,
                         startFrame = startFrame,
@@ -221,6 +224,7 @@ class GameScene() : Scene() {
             }
             down(Key.UP) {
                 if (control) {
+                    println(if (getTile(world, person) == TileType.GROUND) 1 else 2)
                     person.playAnimation(
                         CharMoves.UP.animation,
                         startFrame = startFrame,
@@ -234,6 +238,7 @@ class GameScene() : Scene() {
             }
             down(Key.LEFT) {
                 if (control) {
+                    println(if (getTile(world, person) == TileType.GROUND) 1 else 2)
                     person.playAnimation(
                         CharMoves.LEFT.animation,
                         startFrame = startFrame,
@@ -247,6 +252,7 @@ class GameScene() : Scene() {
             }
             down(Key.RIGHT) {
                 if (control) {
+                    println(if (getTile(world, person) == TileType.GROUND) 1 else 2)
                     person.playAnimation(
                         CharMoves.RIGHT.animation,
                         startFrame = startFrame,
@@ -276,7 +282,7 @@ class GameScene() : Scene() {
 
 suspend fun init() {
     val bitmap = resourcesVfs["tilemap.png"].readBitmap()
-    val ground = resourcesVfs["groundTexture.jpg"].readBitmap()
+    val ground = resourcesVfs["grass.png"].readBitmap()
     val water  = resourcesVfs["waterTextureMinimised.png"].readBitmap()
 
     val charSpriteMap = resourcesVfs["char.png"].readBitmap()
@@ -343,4 +349,8 @@ fun changeFrame() {
     if (startFrame >= 6) {
         startFrame = 0
     }
+}
+
+fun getTile(world: World, person: Sprite) : TileType {
+    return world.array[(person.y / 32).toInt()][(person.x / 32).toInt()].tileType
 }
