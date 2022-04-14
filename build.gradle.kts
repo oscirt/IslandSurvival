@@ -11,6 +11,7 @@ buildscript {
 	}
 	dependencies {
 		classpath("com.soywiz.korlibs.korge.plugins:korge-gradle-plugin:$korgePluginVersion")
+		classpath("io.reactivex.rxjava3:rxkotlin:3.0.1")
 	}
 }
 

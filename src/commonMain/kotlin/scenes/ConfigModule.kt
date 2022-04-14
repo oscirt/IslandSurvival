@@ -7,7 +7,7 @@ import com.soywiz.korma.geom.SizeInt
 import kotlin.reflect.KClass
 
 object ConfigModule : Module() {
-    override val size = SizeInt(1280, 720)
+    override val size = SizeInt(640, 360)
     override val clipBorders = false
     override val mainScene: KClass<out Scene> = GameScene::class
 
