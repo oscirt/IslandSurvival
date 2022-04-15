@@ -4,41 +4,40 @@ import Inventory
 import InventoryCell
 import Thing
 import character.CharMoves
+import character.Character
 import com.soywiz.klock.milliseconds
 import com.soywiz.kmem.clamp
 import com.soywiz.korev.Key
 import com.soywiz.korev.TouchEvent
 import com.soywiz.korge.baseview.BaseView
 import com.soywiz.korge.component.TouchComponent
-import com.soywiz.korge.input.*
+import com.soywiz.korge.input.keys
+import com.soywiz.korge.input.onClick
+import com.soywiz.korge.input.onDown
+import com.soywiz.korge.input.onUp
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.tiled.readTiledMap
 import com.soywiz.korge.tiled.tiledMapView
-import com.soywiz.korge.ui.UI_DEFAULT_WIDTH
-import com.soywiz.korge.ui.uiButton
 import com.soywiz.korge.view.*
 import com.soywiz.korim.bitmap.slice
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.color.RGBA
 import com.soywiz.korim.format.readBitmap
-import com.soywiz.korio.async.launchImmediately
-import com.soywiz.korio.async.runBlockingNoJs
 import com.soywiz.korio.file.std.resourcesVfs
 import com.soywiz.korma.geom.*
 import com.soywiz.korma.geom.vector.circle
+import kotlinx.coroutines.*
 import kotlin.math.abs
 import kotlin.math.hypot
-import kotlin.math.sign
 
 const val inventoryCell = 61.5
 
 var control = true
 var startFrame = 0
-var dir = 0
 
 lateinit var ball: View
 
-class GameScene() : Scene() {
+class GameScene : Scene() {
     override suspend fun Container.sceneInit() {
         init()
 
@@ -52,14 +51,12 @@ class GameScene() : Scene() {
 
 
             //персонаж
-            val spriteMap = resourcesVfs["char.png"].readBitmap()
-            val person = sprite(spriteMap.slice(RectangleInt(10, 0, 100, 100))) {
+            val spriteMap = resourcesVfs["person.png"].readBitmap()
+            val person = Character(sprite(spriteMap.slice(RectangleInt(16, 14, 64, 64))) {
                 scaledHeight = 32.0
                 scaledWidth = 32.0
                 centerOn(this@sceneInit)
-            }
-            var localX = (person.x / 32).toInt()
-            var localY = (person.y / 32).toInt()
+            })
 
 
             //инвентарь
@@ -72,6 +69,7 @@ class GameScene() : Scene() {
                 }
             )
             inventoryContainer.addChild(inventoryBackground)
+
 
 
             //создание ячеек инвентаря
@@ -89,6 +87,41 @@ class GameScene() : Scene() {
             }
 
 
+            //tools
+            val inv = resourcesVfs["inventory.png"].readBitmap()
+            val tools = container {
+                val rect = solidRect(705, 95, Colors.LIGHTGREY) {
+                    for (i in 0 until 8) {
+                        roundRect(75.0, 75.0, 5.0){
+                            alignBottomToBottomOf(this@solidRect, 10)
+                            x = this@solidRect.x + 10 + i * 75
+                            onDown {
+                                alpha = 0.5
+                            }
+                            onUp {
+                                alpha = 1.0
+                            }
+                        }
+                    }
+                }
+                roundRect(75.0, 75.0, 5.0) {
+                    alignTopToTopOf(this, 10)
+                    alignRightToRightOf(rect, 10)
+                    image(inv) {
+                        scale = 0.8
+                        centerOn(this@roundRect)
+                        onClick {
+                            control = false
+                            inventoryContainer.addTo(this@sceneInit)
+                        }
+                    }
+                }
+                scale = 0.5
+                centerXOn(this@fixedSizeContainer)
+                alignBottomToBottomOf(this@fixedSizeContainer)
+            }
+
+
             //мечики
             val sword = Thing(
                 Image(resourcesVfs["sword.png"].readBitmap())
@@ -102,7 +135,6 @@ class GameScene() : Scene() {
             sword2.img.addTo(camera)
 
             //виртуальный контроллер
-            val tet = text("0/0")
             container {
                 alignBottomToBottomOf(this@sceneInit, 60)
                 alignLeftToLeftOf(this@sceneInit, 60)
@@ -115,50 +147,80 @@ class GameScene() : Scene() {
                     alpha(0.2)
                 }
             }
+
+
+            //костыль
             this.addComponent(object : TouchComponent {
                 override val view: BaseView = this@sceneInit
 
                 var dragging = false
                 val start = Point(0, 0)
+                var jobs = arrayListOf<Job>()
 
                 override fun onTouchEvent(views: Views, e: TouchEvent) {
                     val px = e.activeTouches.firstOrNull()?.x ?: 0.0
                     val py = e.activeTouches.firstOrNull()?.y ?: 0.0
-                    tet.text = "$px/$py"
-                    tet.centerXOn(camera)
+
+                    println(e)
 
                     when (e.type) {
                         TouchEvent.Type.START -> {
                             when {
                                 //fix size
-                                  px in views.virtualLeft+10..views.virtualLeft+285 && py in views.virtualBottom-285..views.virtualBottom-10-> {
+                                px in views.virtualLeft+10..views.virtualLeft+285 && py in views.virtualBottom-285..views.virtualBottom-10-> {
                                     start.x = px
                                     start.y = py
                                     ball.alpha = 0.3
                                     dragging = true
                                 }
                             }
+//                            println("start")
                         }
                         TouchEvent.Type.END -> {
                             ball.position(0, 0)
                             ball.alpha = 0.2
                             dragging = false
+                            person.sprite.stopAnimation()
+//                            println("end")
                         }
                         TouchEvent.Type.MOVE -> {
+                            //частое создание корутин не оч хорошо сказывается на производительности
                             if (dragging) {
+                                if (jobs.firstOrNull() != null) {
+                                    jobs.first().cancel()
+                                    jobs.remove(jobs.first())
+                                }
                                 val deltaX = px - start.x
                                 val deltaY = py - start.y
                                 val length = hypot(deltaX, deltaY)
-                                val maxLength = 50.0
-                                val lengthClamped = length.clamp(0.0, maxLength)
+                                val lengthClamped = length.clamp(0.0, 50.0)
                                 val angle = Angle.between(start.x, start.y, px, py)
                                 val cx = cos(angle) * lengthClamped
                                 val cy = sin(angle) * lengthClamped
                                 ball.position(cx, cy)
-                                camera.x -= cx * 0.05
-                                camera.y -= cy * 0.05
-
+                                jobs.add(launch {
+                                    while (dragging) {
+                                        camera.x -= cx * 0.05
+                                        camera.y -= cy * 0.05
+                                        delay(1L)
+                                    }
+                                })
+                                if (cos(angle) < 0) {
+                                    person.sprite.playAnimationLooped(
+                                        CharMoves.RIGHT.animation,
+                                        150.milliseconds
+                                    )
+                                } else {
+                                    person.sprite.playAnimation(
+                                        CharMoves.LEFT.animation,
+                                        150.milliseconds
+                                    )
+                                }
                             }
+                            println("move")
+                        }
+                        TouchEvent.Type.HOVER -> {
+                            println("Hello world!")
                         }
                     }
                 }
@@ -211,109 +273,12 @@ class GameScene() : Scene() {
             }
 
 
-            val inv = resourcesVfs["inventory.png"].readBitmap()
-            val tools = container {
-                val rect = solidRect(705, 95, Colors.LIGHTGREY) {
-                    for (i in 0 until 8) {
-                        roundRect(75.0, 75.0, 5.0).alignBottomToBottomOf(this, 10).x = this.x + 10 + i * 75
-                    }
-                }
-                roundRect(75.0, 75.0, 5.0) {
-                    alignTopToTopOf(this, 10)
-                    alignRightToRightOf(rect, 10)
-                    image(inv) {
-                        scale = 0.8
-                        centerOn(this@roundRect)
-                        onClick {
-                            control = false
-                            inventoryContainer.addTo(this@sceneInit)
-                        }
-                    }
-                }
-                scale = 0.5
-                centerXOn(this@fixedSizeContainer)
-                alignBottomToBottomOf(this@fixedSizeContainer)
-            }
-
-
-            person.onFrameChanged {
-                person.stopAnimation()
-            }
-
-
-            val txt = text("0/0")
-
-
             this.keys.apply {
                 down { key ->
-                    when (key.key) {
-//                        Key.RIGHT -> {
-//                            txt.text = "${localX}/${localY}"
-//                            if (control && tileMap.tileLayers[1][localX + 1, localY] == 0) {
-//                                person.playAnimation(
-//                                    CharMoves.RIGHT.animation,
-//                                    startFrame = startFrame,
-//                                    endFrame = startFrame
-//                                )
-//                                changeFrame()
-//                                dir = 2
-//                                camera.x -= 32
-//                                localX++
-//                            }
-//                        }
-//                        Key.LEFT -> {
-//                            txt.text = "${localX}/${localY}"
-//                            if (control && tileMap.tileLayers[1][localX - 1, localY] == 0) {
-//                                person.playAnimation(
-//                                    CharMoves.LEFT.animation,
-//                                    startFrame = startFrame,
-//                                    endFrame = startFrame
-//                                )
-//                                changeFrame()
-//                                dir = 3
-//                                camera.x += 32
-//                                localX--
-//                            }
-//                        }
-//                        Key.DOWN -> {
-//                            txt.text = "${localX}/${localY}"
-//                            if (control && tileMap.tileLayers[1][localX, localY + 1] == 0) {
-//                                person.playAnimation(
-//                                    CharMoves.DOWN.animation,
-//                                    startFrame = startFrame,
-//                                    endFrame = startFrame
-//                                )
-//                                changeFrame()
-//                                dir = 0
-//                                camera.y -= 32
-//                                localY++
-//                            }
-//                        }
-//                        Key.UP -> {
-//                            txt.text = "${localX}/${localY}"
-//                            if (control && tileMap.tileLayers[1][localX, localY - 1] == 0) {
-//                                person.playAnimation(
-//                                    CharMoves.UP.animation,
-//                                    startFrame = startFrame,
-//                                    endFrame = startFrame
-//                                )
-//                                changeFrame()
-//                                dir = 1
-//                                camera.y += 32
-//                                localY--
-//                            }
-//                        }
-                        Key.X -> {
-                            if (control) {
-                                person.playAnimation(CharMoves.SIT.animation, 200.milliseconds, startFrame = dir, endFrame = dir)
-                                person.stopAnimation()
-                            }
-                        }
-                        Key.ESCAPE -> {
-                            if (!control) {
-                                inventoryContainer.removeFromParent()
-                                control = true
-                            }
+                    if (key.key == Key.ESCAPE) {
+                        if (!control) {
+                            inventoryContainer.removeFromParent()
+                            control = true
                         }
                     }
                 }
@@ -323,60 +288,25 @@ class GameScene() : Scene() {
 }
 
 suspend fun init() {
-    val charSpriteMap = resourcesVfs["char.png"].readBitmap()
-
-    CharMoves.DOWN.animation = SpriteAnimation(
-        spriteMap = charSpriteMap,
-        spriteWidth = 100,
-        spriteHeight = 100,
-        marginLeft = 110,
-        columns = 6,
-        rows = 1
-    )
-
-    CharMoves.UP.animation = SpriteAnimation(
-        spriteMap = charSpriteMap,
-        spriteWidth = 100,
-        spriteHeight = 100,
-        marginTop = 100,
-        marginLeft = 110,
-        columns = 6,
-        rows = 1
-    )
+    val charSpriteMap = resourcesVfs["person.png"].readBitmap()
 
     CharMoves.RIGHT.animation = SpriteAnimation(
         spriteMap = charSpriteMap,
-        spriteWidth = 100,
-        spriteHeight = 100,
-        marginTop = 200,
-        marginLeft = 110,
-        columns = 6,
+        spriteWidth = 64,
+        spriteHeight = 64,
+        marginLeft = 16,
+        marginTop = 78,
+        columns = 9,
         rows = 1
     )
 
     CharMoves.LEFT.animation = SpriteAnimation(
         spriteMap = charSpriteMap,
-        spriteWidth = 100,
-        spriteHeight = 100,
-        marginTop = 300,
-        marginLeft = 110,
-        columns = 6,
+        spriteWidth = 64,
+        spriteHeight = 64,
+        marginLeft = 16,
+        marginTop = 208,
+        columns = 9,
         rows = 1
     )
-
-    CharMoves.SIT.animation = SpriteAnimation(
-        spriteMap = charSpriteMap,
-        spriteWidth = 100,
-        spriteHeight = 100,
-        marginLeft = 710,
-        columns = 1,
-        rows = 4
-    )
-}
-
-fun changeFrame() {
-    startFrame++
-    if (startFrame >= 6) {
-        startFrame = 0
-    }
 }
