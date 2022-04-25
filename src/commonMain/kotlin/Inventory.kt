@@ -4,7 +4,7 @@ class Inventory(
     val cols: Int,
 ) {
     val tools = arrayListOf<InventoryCell>()
-    var selected = -1
+    var selected = 1
 
     fun getFreeCellIndex() : Int {
         for (i in 0 until rows) {
