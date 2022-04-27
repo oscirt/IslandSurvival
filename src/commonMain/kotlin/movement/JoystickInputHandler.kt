@@ -1,6 +1,7 @@
 package movement
 
 import character.CharMoves
+import character.Character
 import com.soywiz.klock.milliseconds
 import com.soywiz.kmem.clamp
 import com.soywiz.korev.TouchEvent
@@ -14,12 +15,18 @@ import com.soywiz.korma.geom.cos
 import com.soywiz.korma.geom.sin
 import com.soywiz.korma.geom.vector.circle
 import kotlin.math.hypot
+import kotlin.math.pow
+
+var dx = 0.0
+var dy = 0.0
+
+const val speed = 1.0
+const val radius = 70.0
 
 var isRight: Boolean = false
+
 fun Container.addJoystick(
-    sprite: Sprite,
-    radius: Double = 70.0,
-    onStick: (x: Double, y: Double) -> Unit = { _, _, -> }
+    sprite: Sprite
 ) {
     var dragging = false
     val view = this
@@ -62,7 +69,7 @@ fun Container.addJoystick(
                     ball.alpha = 0.2
                     dragging = false
                     sprite.stopAnimation()
-                    onStick(0.0, 0.0)
+                    update(0.0, 0.0, view)
                 }
                 TouchEvent.Type.MOVE -> {
                     if (dragging) {
@@ -87,10 +94,32 @@ fun Container.addJoystick(
                             isRight = true
                         }
                         val lengthNormalized = lengthClamped / maxLength
-                        onStick(cos(angle) * lengthNormalized, sin(angle) * lengthNormalized)
+                        update(cos(angle) * lengthNormalized, sin(angle) * lengthNormalized, view)
                     }
                 }
             }
         }
     })
+}
+
+fun update(x: Double, y: Double, view: View) {
+    view.addUpdater {
+        dx = x * 2.0 * (-1)
+        dy = y * 2.0 * (-1)
+    }
+}
+
+fun move(container: Container) {
+    val scale = 0.42
+    dx = dx.clamp(-10.0, +10.0)
+    dy = dy.clamp(-10.0, +10.0)
+    if (container is Character) {
+        container.x -= (dx * scale) * speed
+        container.y -= (dy * scale) * speed
+        println("hello")
+    } else {
+        container.x += (dx * scale) * speed
+        container.y += (dy * scale) * speed
+        println("world")
+    }
 }
