@@ -1,6 +1,5 @@
 package inventory
 
-import Thing
 import com.soywiz.korge.view.RoundRect
 
 class InventoryCell(

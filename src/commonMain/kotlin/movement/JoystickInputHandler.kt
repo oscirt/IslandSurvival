@@ -14,6 +14,7 @@ import com.soywiz.korma.geom.Point
 import com.soywiz.korma.geom.cos
 import com.soywiz.korma.geom.sin
 import com.soywiz.korma.geom.vector.circle
+import scenes.tiledMapView
 import kotlin.math.hypot
 import kotlin.math.pow
 
@@ -114,12 +115,13 @@ fun move(container: Container) {
     dx = dx.clamp(-10.0, +10.0)
     dy = dy.clamp(-10.0, +10.0)
     if (container is Character) {
-        container.x -= (dx * scale) * speed
-        container.y -= (dy * scale) * speed
-        println("hello")
+        container.x += 12
+        container.y += 26
+        container.moveWithHitTestable(tiledMapView, -(dx * scale) * speed, -(dy * scale) * speed)
+        container.x -= 12
+        container.y -= 26
     } else {
         container.x += (dx * scale) * speed
         container.y += (dy * scale) * speed
-        println("world")
     }
 }
