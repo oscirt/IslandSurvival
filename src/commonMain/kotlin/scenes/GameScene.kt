@@ -1,6 +1,5 @@
 package scenes
 
-import inventory.Thing
 import character.Character
 import character.initCharMoves
 import com.soywiz.klock.Stopwatch
@@ -17,9 +16,9 @@ import com.soywiz.korim.format.readBitmap
 import com.soywiz.korio.file.std.resourcesVfs
 import com.soywiz.korma.geom.RectangleInt
 import inventory.Inventory
+import inventory.Thing
 import inventory.ToolBar
 import inventory.TypeThing
-import kotlinx.coroutines.newCoroutineContext
 import movement.addJoystick
 
 lateinit var tiledMapView: TiledMapView
@@ -40,7 +39,7 @@ class GameScene : Scene() {
         tileMap = resourcesVfs["Island.tmx"].readTiledMap()
         personSprite = Sprite(resourcesVfs["person.png"]
             .readBitmap()
-            .slice(RectangleInt(16, 14, 64, 64))
+            .slice(RectangleInt(17, 15, 29, 45))
         )
         inventorySprite = resourcesVfs["inventory.png"].readBitmap()
 
@@ -61,7 +60,8 @@ class GameScene : Scene() {
             thing.type.img.x = 1600.0
             thing.type.img.y = 1600.0
             objects.add(thing)
-            println(objects.size)
+            //thing.type.img.width, thing.type.img.height
+            solidRect(thing.type.img.width, thing.type.img.height).xy(thing.type.img.x, thing.type.img.y).alpha(0.3)
 
             character = Character(personSprite, this)
 
@@ -90,6 +90,6 @@ class GameScene : Scene() {
         }
 
         camera.cameraViewportBounds.copyFrom(tiledMapView.getLocalBoundsOptimized())
-        camera.follow(character, setImmediately = true)
+        camera.follow(character.sprite, setImmediately = true)
     }
 }

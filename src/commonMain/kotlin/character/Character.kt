@@ -1,5 +1,6 @@
 package character
 
+import com.soywiz.kds.iterators.fastForEach
 import com.soywiz.korge.view.*
 import scenes.objects
 
@@ -12,8 +13,8 @@ class Character(
 
     init {
         sprite.apply {
-            scaledHeight = 32.0
-            scaledWidth = 32.0
+            scaledHeight = 22.5
+            scaledWidth = 14.5
             addTo(this@Character)
             centerOn(this@Character)
         }
@@ -22,8 +23,7 @@ class Character(
         scene.addChild(this)
         solidRect(width, height).alpha(0.3)
         addUpdater {
-            println("$x/$y\t${sprite.x}/${sprite.y}")
-//            if (collidesWith(objects[0].type.img)) println("$x/$y\n${objects[0].type.img.x}/${objects[0].type.img.y}")
+            if (objects[0].type.img.collidesWith(this)) println("Hello")
         }
     }
 }

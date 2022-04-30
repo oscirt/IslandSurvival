@@ -115,11 +115,11 @@ fun move(container: Container) {
     dx = dx.clamp(-10.0, +10.0)
     dy = dy.clamp(-10.0, +10.0)
     if (container is Character) {
-        container.x += 12
-        container.y += 26
+        container.x += 50.75
+        container.y += 60.75
         container.moveWithHitTestable(tiledMapView, -(dx * scale) * speed, -(dy * scale) * speed)
-        container.x -= 12
-        container.y -= 26
+        container.x -= 50.75
+        container.y -= 60.75
     } else {
         container.x += (dx * scale) * speed
         container.y += (dy * scale) * speed

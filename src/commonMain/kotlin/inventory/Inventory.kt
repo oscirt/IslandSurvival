@@ -19,7 +19,6 @@ class Inventory(
     init {
         roundRect(container.width, container.height, 0.0).apply {
             color = RGBA(0x00, 0x00, 0x00, 0x88)
-            println("${container.width}|${container.height}")
         }
         val inventoryBackground = roundRect(container.width * 0.8, container.height * 0.8, 5.0).apply {
             color = RGBA(198, 198, 198)
