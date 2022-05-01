@@ -1,6 +1,7 @@
 package action_ui
 
 import character.CharMoves
+import character.CharMoves.*
 import character.Character
 import com.soywiz.klock.milliseconds
 import com.soywiz.kmem.clamp
@@ -23,7 +24,7 @@ var dy = 0.0
 const val speed = 1.0
 const val radius = 70.0
 
-var isRight: Boolean = false
+var moveDirectory = DOWN
 
 fun Container.addJoystick(
     sprite: Sprite
@@ -80,18 +81,30 @@ fun Container.addJoystick(
                         val lengthClamped = length.clamp(0.0, maxLength)
                         val angle = Angle.between(start.x, start.y, px, py)
                         ball.position(cos(angle) * lengthClamped, sin(angle) * lengthClamped)
-                        if (cos(angle) < 0) {
+                        if (cos(angle) in -0.7..0.7 && sin(angle) <= -0.7) {
                             sprite.playAnimationLooped(
-                                CharMoves.RIGHT.animation,
+                                UP.animation,
                                 100.milliseconds
                             )
-                            isRight = false
-                        } else {
+                            moveDirectory = UP
+                        } else if (cos(angle) in -0.7..0.7 && sin(angle) >= 0.7) {
                             sprite.playAnimationLooped(
-                                CharMoves.LEFT.animation,
+                                DOWN.animation,
                                 100.milliseconds
                             )
-                            isRight = true
+                            moveDirectory = DOWN
+                        } else if (sin(angle) in -0.7..0.7 && cos(angle) >= 0.7) {
+                            sprite.playAnimationLooped(
+                                RIGHT.animation,
+                                100.milliseconds
+                            )
+                            moveDirectory = RIGHT
+                        } else if (sin(angle) in -0.7..0.7 && cos(angle) <= -0.7) {
+                            sprite.playAnimationLooped(
+                                LEFT.animation,
+                                100.milliseconds
+                            )
+                            moveDirectory = LEFT
                         }
                         val lengthNormalized = lengthClamped / maxLength
                         update(cos(angle) * lengthNormalized, sin(angle) * lengthNormalized, view)

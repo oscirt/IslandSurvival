@@ -27,7 +27,7 @@ fun readObjects() {
     }
 }
 
-fun attachObjects(container: Container) {
+fun attachObjectsTo(container: Container) {
     objects.forEach {
         it.sprite.addTo(container)
     }

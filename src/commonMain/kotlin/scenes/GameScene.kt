@@ -2,7 +2,7 @@ package scenes
 
 import action_ui.addActionButton
 import action_ui.addJoystick
-import attachObjects
+import attachObjectsTo
 import camera.createCamera
 import character.Character
 import character.initCharMoves
@@ -57,7 +57,7 @@ class GameScene : Scene() {
 
         val camera = createCamera(character, this)
 
-        attachObjects(camera.content)
+        attachObjectsTo(camera.content)
 
         val inventory = Inventory(this)
 
