@@ -1,4 +1,4 @@
-package movement
+package action_ui
 
 import character.CharMoves
 import character.Character
@@ -16,7 +16,6 @@ import com.soywiz.korma.geom.sin
 import com.soywiz.korma.geom.vector.circle
 import scenes.tiledMapView
 import kotlin.math.hypot
-import kotlin.math.pow
 
 var dx = 0.0
 var dy = 0.0

@@ -3,13 +3,12 @@ package inventory
 import com.soywiz.korge.input.onClick
 import com.soywiz.korge.input.onDown
 import com.soywiz.korge.view.*
-import com.soywiz.korim.bitmap.Bitmap
 import com.soywiz.korim.color.Colors
+import scenes.inventoryBitmap
 
 class ToolBar(
     private val inventory: Inventory,
-    private val container: Container,
-    private val inventorySprite: Bitmap
+    private val container: Container
 ) : Container() {
     private val tools = arrayListOf<InventoryCell>()
     private var selected = 1
@@ -32,7 +31,7 @@ class ToolBar(
         roundRect(75.0, 75.0, 5.0) {
             alignTopToTopOf(this, 10)
             alignRightToRightOf(rect, 10)
-            image(inventorySprite) {
+            sprite(inventoryBitmap).apply {
                 scale = 0.8
                 centerOn(this@roundRect)
                 onClick {

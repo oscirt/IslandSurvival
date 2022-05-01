@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.4" orientation="orthogonal" renderorder="left-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="5">
+<map version="1.8" tiledversion="1.8.4" orientation="orthogonal" renderorder="left-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="7">
  <tileset firstgid="1" name="BeautifullTileset" tilewidth="32" tileheight="32" tilecount="1288" columns="56">
   <image source="BeautifullTileset.png" width="1792" height="736"/>
   <tile id="56">
@@ -2148,7 +2148,13 @@
 </data>
  </layer>
  <objectgroup id="7" name="npc">
-  <object id="1" name="npc" type="npc" x="2079.33" y="1084.67">
+  <object id="1" name="npc" type="npc" x="1948.83" y="1212.67">
+   <point/>
+  </object>
+  <object id="5" name="npc" type="npc" x="1987" y="1211.5">
+   <point/>
+  </object>
+  <object id="6" name="chest" type="chest" x="2035.5" y="1210">
    <point/>
   </object>
  </objectgroup>

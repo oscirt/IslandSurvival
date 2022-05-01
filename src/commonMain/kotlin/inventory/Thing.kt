@@ -1,9 +1,13 @@
 package inventory
 
-import com.soywiz.korge.view.Image
+import com.soywiz.korge.view.Sprite
 
 class Thing(
-    val type: TypeThing
-){
+    val sprite: Sprite,
+    val type: ThingType,
 
+){
+    init {
+
+    }
 }
