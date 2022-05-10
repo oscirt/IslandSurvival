@@ -1,6 +1,5 @@
 package action_ui
 
-import character.CharMoves
 import character.CharMoves.*
 import character.Character
 import com.soywiz.klock.milliseconds
@@ -18,6 +17,8 @@ import com.soywiz.korma.geom.vector.circle
 import scenes.tiledMapView
 import kotlin.math.hypot
 
+val padding = Point(21.75, 47.0)
+
 var dx = 0.0
 var dy = 0.0
 
@@ -27,16 +28,17 @@ const val radius = 70.0
 var moveDirectory = DOWN
 
 fun Container.addJoystick(
-    sprite: Sprite
+    character: Character
 ) {
     var dragging = false
     val view = this
     lateinit var ball: View
+    lateinit var circle: View
 
     container {
         x += radius + 15
         y += view.height - 15 - radius
-        graphics {
+        circle = graphics {
             fill(Colors.BLACK) { circle(0.0, 0.0, radius) }
             alpha(0.2)
         }
@@ -54,10 +56,12 @@ fun Container.addJoystick(
             val px = e.activeTouches.firstOrNull()?.x ?: 0.0
             val py = e.activeTouches.firstOrNull()?.y ?: 0.0
 
+            // TODO: 01.05.2022 add multiple touch handling
+
             when (e.type) {
                 TouchEvent.Type.START -> {
                     when {
-                        px in views.virtualLeft+10..views.virtualLeft+285 && py in views.virtualBottom-285..views.virtualBottom-10-> {
+                        circle.hitTestAny(px, py) -> {
                             start.x = px
                             start.y = py
                             ball.alpha = 0.3
@@ -69,7 +73,7 @@ fun Container.addJoystick(
                     ball.position(0, 0)
                     ball.alpha = 0.2
                     dragging = false
-                    sprite.stopAnimation()
+                    character.sprite.stopAnimation()
                     update(0.0, 0.0, view)
                 }
                 TouchEvent.Type.MOVE -> {
@@ -82,34 +86,51 @@ fun Container.addJoystick(
                         val angle = Angle.between(start.x, start.y, px, py)
                         ball.position(cos(angle) * lengthClamped, sin(angle) * lengthClamped)
                         if (cos(angle) in -0.7..0.7 && sin(angle) <= -0.7) {
-                            sprite.playAnimationLooped(
+                            character.sprite.playAnimationLooped(
                                 UP.animation,
                                 100.milliseconds
                             )
-                            moveDirectory = UP
+                            if (moveDirectory != UP) {
+                                moveDirectory = UP
+                                character.solid.centerXOn(character)
+                                character.solid.alignTopToTopOf(character)
+                            }
                         } else if (cos(angle) in -0.7..0.7 && sin(angle) >= 0.7) {
-                            sprite.playAnimationLooped(
+                            character.sprite.playAnimationLooped(
                                 DOWN.animation,
                                 100.milliseconds
                             )
-                            moveDirectory = DOWN
+                            if (moveDirectory != DOWN) {
+                                moveDirectory = DOWN
+                                character.solid.centerXOn(character)
+                                character.solid.alignBottomToBottomOf(character)
+                            }
                         } else if (sin(angle) in -0.7..0.7 && cos(angle) >= 0.7) {
-                            sprite.playAnimationLooped(
+                            character.sprite.playAnimationLooped(
                                 RIGHT.animation,
                                 100.milliseconds
                             )
-                            moveDirectory = RIGHT
+                            if (moveDirectory != RIGHT) {
+                                moveDirectory = RIGHT
+                                character.solid.centerYOn(character)
+                                character.solid.alignRightToRightOf(character)
+                            }
                         } else if (sin(angle) in -0.7..0.7 && cos(angle) <= -0.7) {
-                            sprite.playAnimationLooped(
+                            character.sprite.playAnimationLooped(
                                 LEFT.animation,
                                 100.milliseconds
                             )
-                            moveDirectory = LEFT
+                            if (moveDirectory != LEFT) {
+                                moveDirectory = LEFT
+                                character.solid.centerYOn(character)
+                                character.solid.alignLeftToLeftOf(character)
+                            }
                         }
                         val lengthNormalized = lengthClamped / maxLength
                         update(cos(angle) * lengthNormalized, sin(angle) * lengthNormalized, view)
                     }
                 }
+                else -> TODO()
             }
         }
     })
@@ -127,11 +148,11 @@ fun move(container: Container) {
     dx = dx.clamp(-10.0, +10.0)
     dy = dy.clamp(-10.0, +10.0)
     if (container is Character) {
-        container.x += 50.75
-        container.y += 60.75
+        container.x += padding.x
+        container.y += padding.y
         container.moveWithHitTestable(tiledMapView, -(dx * scale) * speed, -(dy * scale) * speed)
-        container.x -= 50.75
-        container.y -= 60.75
+        container.x -= padding.x
+        container.y -= padding.y
     } else {
         container.x += (dx * scale) * speed
         container.y += (dy * scale) * speed

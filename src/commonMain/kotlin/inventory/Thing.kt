@@ -4,10 +4,5 @@ import com.soywiz.korge.view.Sprite
 
 class Thing(
     val sprite: Sprite,
-    val type: ThingType,
-
-){
-    init {
-
-    }
-}
+    val type: ThingType
+)

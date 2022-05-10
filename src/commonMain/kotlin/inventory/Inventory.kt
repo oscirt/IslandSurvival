@@ -1,6 +1,7 @@
 package inventory
 
 import com.soywiz.korge.view.Container
+import com.soywiz.korge.view.addTo
 import com.soywiz.korge.view.centerOn
 import com.soywiz.korge.view.roundRect
 import com.soywiz.korim.color.RGBA
@@ -14,7 +15,7 @@ var control = true
 class Inventory(
     container: Container
 ) : Container() {
-    private val items = arrayListOf<ArrayList<InventoryCell>>()
+    var items = arrayListOf<ArrayList<InventoryCell>>()
 
     init {
         roundRect(container.width, container.height, 0.0).apply {
@@ -27,12 +28,11 @@ class Inventory(
         for (i in 0 until rows) {
             items.add(arrayListOf())
             for (j in 0 until cols) {
-                items[i].add(InventoryCell())
-                addChild(roundRect(inventoryCell, inventoryCell, 15.0) {
+                items[i].add(InventoryCell(rect = roundRect(inventoryCell, inventoryCell, 15.0) {
                     color = RGBA(139, 139, 139, 255)
                     x += (j * inventoryCell) + inventoryBackground.x + 10
                     y += (i * inventoryCell) + inventoryBackground.y + 10
-                })
+                }))
             }
         }
     }
@@ -47,5 +47,12 @@ class Inventory(
             }
         }
         return -1
+    }
+
+    fun updateInventory(thing: Thing) {
+        val row = getFreeCellIndex() / 8
+        val col = getFreeCellIndex() % 8
+        items[row][col].thing = thing
+        thing.sprite.addTo(this).centerOn(items[row][col].rect)
     }
 }
