@@ -20,6 +20,7 @@ import inventory.Inventory
 import inventory.ToolBar
 import inventory.TypeThing
 import kotlinx.coroutines.newCoroutineContext
+import movement.addButton
 import movement.addJoystick
 
 lateinit var tiledMapView: TiledMapView
@@ -88,6 +89,8 @@ class GameScene : Scene() {
         addUpdater {
             movement.move(character)
         }
+        // button
+        addButton(character.sprite)
 
         camera.cameraViewportBounds.copyFrom(tiledMapView.getLocalBoundsOptimized())
         camera.follow(character, setImmediately = true)

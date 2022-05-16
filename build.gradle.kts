@@ -36,3 +36,6 @@ korge {
 	targetIos()
 	targetAndroidIndirect() // targetAndroidDirect()
 }
+//dependencies {
+//    implementation(kotlin("script-runtime"))
+//}
