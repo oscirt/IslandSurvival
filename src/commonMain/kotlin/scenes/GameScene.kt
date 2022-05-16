@@ -1,6 +1,5 @@
 package scenes
 
-import action_ui.addActionButton
 import action_ui.addJoystick
 import player_data.attachObjectsTo
 import camera.createCamera
@@ -81,7 +80,6 @@ class GameScene : Scene() {
         toolBar = ToolBar(inventory, this)
 
         addJoystick(character)
-        addActionButton(character)
 
         addUpdater {
             action_ui.move(character)
