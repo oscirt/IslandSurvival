@@ -11,6 +11,7 @@ class ToolBar(
     private val container: Container
 ) : Container() {
     private var length = 8
+    lateinit var inventoryButton: RoundRect
     var tools = arrayListOf<InventoryCell>()
     var selected = 0
     var current = 0
@@ -29,13 +30,13 @@ class ToolBar(
                 }))
             }
         }
-        roundRect(75.0, 75.0, 5.0) {
+        inventoryButton = roundRect(75.0, 75.0, 5.0) {
             alignTopToTopOf(this, 10)
             alignRightToRightOf(rect, 10)
             sprite(inventoryBitmap).apply {
                 scale = 0.8
                 centerOn(this@roundRect)
-                onClick {
+                onDown {
                     control = false
                     inventory.addTo(container)
                 }
@@ -46,7 +47,6 @@ class ToolBar(
         alignBottomToBottomOf(container)
         addTo(container)
     }
-
 
     fun updateToolbar(thing: Thing) {
         if (current == 8) {

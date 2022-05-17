@@ -19,7 +19,7 @@ class OptionScene() : Scene() {
 
         uiButton {
             text = "BACK"
-            textFont = resourcesVfs["font.ttf"].readFont()
+            textFont = myFont
             textSize = txtSize
             centerXOn(txt)
             alignTopToBottomOf(txt, 20)

@@ -7,6 +7,7 @@ import character.Character
 import character.initCharMoves
 import com.soywiz.klock.Stopwatch
 import com.soywiz.korge.component.docking.keepChildrenSortedByY
+import com.soywiz.korge.input.onClick
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.tiled.TiledMap
 import com.soywiz.korge.tiled.TiledMapView
@@ -15,6 +16,8 @@ import com.soywiz.korge.view.*
 import com.soywiz.korge.view.filter.IdentityFilter
 import com.soywiz.korim.bitmap.Bitmap
 import com.soywiz.korim.bitmap.slice
+import com.soywiz.korim.font.Font
+import com.soywiz.korim.font.readFont
 import com.soywiz.korim.format.readBitmap
 import com.soywiz.korio.file.std.resourcesVfs
 import com.soywiz.korio.serialization.xml.Xml
@@ -23,6 +26,7 @@ import com.soywiz.korma.geom.RectangleInt
 import inventory.Inventory
 import inventory.Thing
 import inventory.ToolBar
+import inventory.control
 import player_data.readObjects
 
 lateinit var tiledMapView: TiledMapView
@@ -34,6 +38,7 @@ lateinit var xml: Xml
 lateinit var charactersLayer: Container
 lateinit var inventory: Inventory
 lateinit var toolBar: ToolBar
+lateinit var myFont: Font
 
 class GameScene : Scene() {
 
@@ -41,6 +46,8 @@ class GameScene : Scene() {
         val sw = Stopwatch().start()
 
         println("start resources loading...")
+
+        myFont = resourcesVfs["font.ttf"].readFont()
 
         initCharMoves(resourcesVfs["person.png"].readBitmap())
         tiledMap = resourcesVfs["Island.tmx"].readTiledMap()
@@ -64,7 +71,7 @@ class GameScene : Scene() {
     }
 
     override suspend fun Container.sceneMain() {
-        keepChildrenSortedByY()
+//        keepChildrenSortedByY()
 //        println("${xml.child("objectgroup")?.allNodeChildren?.filter{ it.attributes["name"] == "start" }?.first()?.attributes}")
 
         val character = Character()
@@ -75,11 +82,11 @@ class GameScene : Scene() {
 
         attachObjectsTo(charactersLayer)
 
+        addJoystick(character)
+
         inventory = Inventory(this)
 
         toolBar = ToolBar(inventory, this)
-
-        addJoystick(character)
 
         addUpdater {
             action_ui.move(character)
