@@ -1,19 +1,22 @@
 package scenes
 
+import action_ui.HealthBar
 import action_ui.addJoystick
-import player_data.attachObjectsTo
 import camera.createCamera
 import character.Character
 import character.initCharMoves
 import com.soywiz.klock.Stopwatch
 import com.soywiz.korge.component.docking.keepChildrenSortedByY
-import com.soywiz.korge.input.onClick
+import com.soywiz.korge.input.onMouseDrag
+import com.soywiz.korge.input.onSwipe
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.tiled.TiledMap
 import com.soywiz.korge.tiled.TiledMapView
 import com.soywiz.korge.tiled.readTiledMap
-import com.soywiz.korge.view.*
+import com.soywiz.korge.view.Container
+import com.soywiz.korge.view.addUpdater
 import com.soywiz.korge.view.filter.IdentityFilter
+import com.soywiz.korge.view.get
 import com.soywiz.korim.bitmap.Bitmap
 import com.soywiz.korim.bitmap.slice
 import com.soywiz.korim.font.Font
@@ -26,18 +29,23 @@ import com.soywiz.korma.geom.RectangleInt
 import inventory.Inventory
 import inventory.Thing
 import inventory.ToolBar
-import inventory.control
+import player_data.attachObjectsTo
 import player_data.readObjects
 
-lateinit var tiledMapView: TiledMapView
-lateinit var tiledMap: TiledMap
-lateinit var characterBitmap: Bitmap
-lateinit var inventoryBitmap: Bitmap
-lateinit var objects: ArrayList<Thing>
-lateinit var xml: Xml
 lateinit var charactersLayer: Container
 lateinit var inventory: Inventory
 lateinit var toolBar: ToolBar
+lateinit var healthBar: HealthBar
+
+lateinit var tiledMapView: TiledMapView
+lateinit var tiledMap: TiledMap
+
+lateinit var characterBitmap: Bitmap
+lateinit var inventoryBitmap: Bitmap
+lateinit var exit_button: Bitmap
+
+lateinit var objects: ArrayList<Thing>
+lateinit var xml: Xml
 lateinit var myFont: Font
 
 class GameScene : Scene() {
@@ -48,6 +56,7 @@ class GameScene : Scene() {
         println("start resources loading...")
 
         myFont = resourcesVfs["font.ttf"].readFont()
+        exit_button = resourcesVfs["no_icon.png"].readBitmap()
 
         initCharMoves(resourcesVfs["person.png"].readBitmap())
         tiledMap = resourcesVfs["Island.tmx"].readTiledMap()
@@ -79,6 +88,8 @@ class GameScene : Scene() {
         charactersLayer.addChild(character)
 
         val camera = createCamera(character, this)
+
+        healthBar = HealthBar(this)
 
         attachObjectsTo(charactersLayer)
 

@@ -11,7 +11,7 @@ class ToolBar(
     private val container: Container
 ) : Container() {
     private var length = 8
-    lateinit var inventoryButton: RoundRect
+    var inventoryButton: RoundRect
     var tools = arrayListOf<InventoryCell>()
     var selected = 0
     var current = 0

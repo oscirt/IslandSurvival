@@ -11,6 +11,7 @@ import com.soywiz.korio.async.launch
 import com.soywiz.korio.file.std.resourcesVfs
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
+import scenes.exit_button
 import scenes.inventory
 import scenes.myFont
 import kotlin.coroutines.coroutineContext
@@ -26,6 +27,7 @@ class Inventory(
 ) : Container() {
     var items = arrayListOf<ArrayList<InventoryCell>>()
     var isPressed = false
+    var dragging = false
 
     init {
         inventoryCell = (container.height - 20) / rows
@@ -40,32 +42,28 @@ class Inventory(
                     color = RGBA(139, 139, 139, 255)
                     x += (j * inventoryCell) + inventoryBackground.x + 10
                     y += (i * inventoryCell) + inventoryBackground.y + 10
-//                    onDown {
-//                        if (!isPressed) alpha(0.5)
-//                    }
+                    onDown {
+                        alpha(0.5)
+                        dragging = true
+                    }
                     onUpAnywhere {
                         alpha(1)
-                        items[i][j].thing?.sprite?.centerOn(this)
+                        dragging = false
                     }
-                    onMove {
-                        if (items[i][j].thing != null) {
+                    onMouseDrag {
+                        if (!dragging) {
+                            items[i][j].thing?.sprite?.centerOn(this@roundRect)
+                        } else if (items[i][j].thing != null) {
                             isPressed = true
-                            println("${it.currentPosGlobal.x}/${it.currentPosGlobal.y}")
-                            println("${it.currentPosStage.x}/${it.currentPosStage.y}")
-                            items[i][j].thing?.sprite?.x = it.currentPosStage.x
-                            items[i][j].thing?.sprite?.y = it.currentPosStage.y
+                            items[i][j].thing?.sprite?.x = this.globalMouseX
+                            items[i][j].thing?.sprite?.y = this.globalMouseY
                         }
                     }
                 }))
             }
         }
 
-        // TODO: 17.05.2022 add png exit button
-        uiButton {
-            text("EXIT")
-            textFont = myFont
-            textSize = textSize
-            buttonTextAlignment = TextAlignment.MIDDLE_CENTER
+        sprite(exit_button) {
             alignTopToTopOf(this@Inventory, 10)
             alignRightToRightOf(this@Inventory, 10)
             onClick {
@@ -91,20 +89,7 @@ class Inventory(
         val index = getFreeCellIndex()
         val row = index / cols
         val col = index % cols
-//        println("*------------------------*")
-//        println(thing)
-//        println(items[row][col].thing)
-//        println("$row | $col")
-//        println("*_____|$row /// $col|_____*")
         items[row][col].thing = thing
-//        println("*------------------------*")
-//        for (i in 0 until rows) {
-//            for (j in 0 until cols) {
-//                print("${if (items[i][j].thing == null) 0 else 1} ")
-//            }
-//            println()
-//        }
-//        println("*------------------------*")
         thing.sprite.addTo(this).centerOn(items[row][col].rect)
     }
 }
