@@ -3,25 +3,26 @@
 package scenes
 
 import com.soywiz.korge.annotations.KorgeExperimental
-import com.soywiz.korge.input.onClick
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.ui.UIButton
 import com.soywiz.korge.ui.UITextInput
 import com.soywiz.korge.ui.uiButton
 import com.soywiz.korge.ui.uiTextInput
 import com.soywiz.korge.view.*
-import com.soywiz.krypto.sha256
 import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
-import io.ktor.utils.io.core.*
-import kotlinx.serialization.decodeFromString
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import models.Credentials
+import models.JsonCredentials
 
 const val authPadding = 10.0
 
-const val  url = "https://localhost:8080"
+//const val  url = "https://korge-server.herokuapp.com/register"
+const val  url = "http://localhost:8080/register"
 
 lateinit var username: UITextInput
 lateinit var password: UITextInput
@@ -57,13 +58,25 @@ class AuthenticationScene() : Scene() {
     }
 
     override suspend fun Container.sceneMain() {
-        loginButton.onClick {
-            val name = username.text
-            val pass = password.text.toByteArray().sha256().base64
-            val response = client.post(url) {
-                setBody("""{"username":$name, "password": "$pass"}""")
-            }
-            println(response.status)
+//        loginButton.onClick {
+//            val name = username.text
+//            val pass = password.text.toByteArray().sha256().base64
+//            val response = client.post(url) {
+//                setBody("""{"username":$name, "password": "$pass"}""")
+//            }
+//            println(response.status)
+//        }
+        val response = client.post(url) {
+            contentType(ContentType.Application.Json)
+            setBody(Json.encodeToString(JsonCredentials("namke", "password")))
         }
+        println(response.status)
+//        val credentials = JsonCredentials("jklkjkljlkj", "sdfjlksdf")
+//        val stringBuilder = StringBuilder()
+//        com.soywiz.korio.serialization.json.Json.stringify(credentials.map, stringBuilder)
+//        println(stringBuilder)
+//        println(credentials.map)
+
+//        print(json.encodeToString(json.serializersModule.serializer(), JsonCredentials(",", "sdfkj")))
     }
 }
