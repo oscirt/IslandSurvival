@@ -21,7 +21,7 @@ korge {
 	id = "com.example.example"
 	jvmMainClassName = "MainKt"
 	orientation = Orientation.LANDSCAPE
-	name = "KorgeGame"
+	name = "IslandSurvivalOnline"
 // To enable all targets at once
 
 	//targetAll()

@@ -1,6 +1,5 @@
 package character
 
-import com.soywiz.korge.view.Sprite
 import com.soywiz.korge.view.SpriteAnimation
 import com.soywiz.korim.bitmap.Bitmap
 

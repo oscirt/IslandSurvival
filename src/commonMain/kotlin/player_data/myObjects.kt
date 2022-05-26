@@ -8,8 +8,8 @@ import com.soywiz.korge.view.addTo
 import com.soywiz.korge.view.xy
 import com.soywiz.korio.concurrent.atomic.KorAtomicInt
 import com.soywiz.korio.concurrent.atomic.incrementAndGet
-import com.soywiz.korio.dynamic.KDynamic.Companion.toInt
 import com.soywiz.korma.geom.Point
+import enemy.Wolf
 import inventory.Thing
 import inventory.ThingType
 import scenes.characterBitmap
