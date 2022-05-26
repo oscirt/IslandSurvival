@@ -40,7 +40,10 @@ lateinit var tiledMap: TiledMap
 lateinit var characterBitmap: Bitmap
 lateinit var inventoryBitmap: Bitmap
 lateinit var exit_button: Bitmap
-
+lateinit var wood: Bitmap
+lateinit var stone: Bitmap
+lateinit var board: Bitmap
+lateinit var knife: Bitmap
 lateinit var objects: ArrayList<Thing>
 lateinit var xml: Xml
 
@@ -52,7 +55,10 @@ class GameScene : Scene() {
         println("start resources loading...")
 
         exit_button = resourcesVfs["no_icon.png"].readBitmap()
-
+        wood = resourcesVfs["wood.png"].readBitmap()
+        stone = resourcesVfs["stone.png"].readBitmap()
+        board = resourcesVfs["board.png"].readBitmap()
+        knife = resourcesVfs["knife.png"].readBitmap()
         initCharMoves(resourcesVfs["person.png"].readBitmap())
         tiledMap = resourcesVfs["Island.tmx"].readTiledMap()
         characterBitmap = resourcesVfs["person.png"]

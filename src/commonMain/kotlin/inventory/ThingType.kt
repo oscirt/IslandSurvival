@@ -2,6 +2,9 @@ package inventory
 
 enum class ThingType {
     NPC,
-    CHEST,
-    DOOR
+    WOOD,
+    STONE,
+    BOARD,
+    KNIFE
+
 }
