@@ -17,9 +17,11 @@ buildscript {
 apply<KorgeGradlePlugin>()
 
 korge {
+	androidPermission("android.permission.INTERNET")
 	id = "com.example.example"
 	jvmMainClassName = "MainKt"
 	orientation = Orientation.LANDSCAPE
+	name = "KorgeGame"
 // To enable all targets at once
 
 	//targetAll()

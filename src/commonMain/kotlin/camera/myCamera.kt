@@ -9,7 +9,7 @@ import scenes.tiledMapView
 fun createCamera(character: Character, container: Container) : CameraContainer {
     return CameraContainer(640.0, 360.0, clip = true, block = { clampToBounds = true }).apply {
         content.addChild(tiledMapView)
-//        content.addChild(charactersLayer)
+        cameraZoom = 1.5
         cameraViewportBounds.copyFrom(tiledMapView.getLocalBoundsOptimized())
         follow(character.sprite, setImmediately = true)
     }.addTo(container)

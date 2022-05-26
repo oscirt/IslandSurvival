@@ -35,9 +35,6 @@ class HealthBar(
             color = Colors.ORANGERED
             centerOn(hpBlock)
         }
-        hpBar.addUpdater {
-            changeHp(-0.5)
-        }
 
         this.addTo(container)
     }

@@ -7,20 +7,17 @@ import character.Character
 import character.initCharMoves
 import com.soywiz.klock.Stopwatch
 import com.soywiz.korge.component.docking.keepChildrenSortedByY
-import com.soywiz.korge.input.onMouseDrag
-import com.soywiz.korge.input.onSwipe
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.tiled.TiledMap
 import com.soywiz.korge.tiled.TiledMapView
 import com.soywiz.korge.tiled.readTiledMap
 import com.soywiz.korge.view.Container
 import com.soywiz.korge.view.addUpdater
+import com.soywiz.korge.view.centerXOn
 import com.soywiz.korge.view.filter.IdentityFilter
 import com.soywiz.korge.view.get
 import com.soywiz.korim.bitmap.Bitmap
 import com.soywiz.korim.bitmap.slice
-import com.soywiz.korim.font.Font
-import com.soywiz.korim.font.readFont
 import com.soywiz.korim.format.readBitmap
 import com.soywiz.korio.file.std.resourcesVfs
 import com.soywiz.korio.serialization.xml.Xml
@@ -46,7 +43,6 @@ lateinit var exit_button: Bitmap
 
 lateinit var objects: ArrayList<Thing>
 lateinit var xml: Xml
-lateinit var myFont: Font
 
 class GameScene : Scene() {
 
@@ -55,7 +51,6 @@ class GameScene : Scene() {
 
         println("start resources loading...")
 
-        myFont = resourcesVfs["font.ttf"].readFont()
         exit_button = resourcesVfs["no_icon.png"].readBitmap()
 
         initCharMoves(resourcesVfs["person.png"].readBitmap())
@@ -80,7 +75,6 @@ class GameScene : Scene() {
     }
 
     override suspend fun Container.sceneMain() {
-//        keepChildrenSortedByY()
 //        println("${xml.child("objectgroup")?.allNodeChildren?.filter{ it.attributes["name"] == "start" }?.first()?.attributes}")
 
         val character = Character()
@@ -100,6 +94,16 @@ class GameScene : Scene() {
         toolBar = ToolBar(inventory, this)
 
         addUpdater {
+            if (needToAttach.isNotEmpty() && isOnline) {
+                val anotherCharacter = Character()
+                val point = needToAttach.pop()
+                println("Add updater: $point")
+                playersContainer[point.name] = anotherCharacter
+                anotherCharacter.txt.text = point.name
+                anotherCharacter.txt.centerXOn(anotherCharacter.sprite)
+                anotherCharacter.updateCharacter(point)
+                charactersLayer.addChild(anotherCharacter)
+            }
             action_ui.move(character)
         }
     }

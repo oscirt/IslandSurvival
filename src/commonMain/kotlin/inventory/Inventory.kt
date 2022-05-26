@@ -1,20 +1,13 @@
 package inventory
 
-import com.soywiz.korge.input.*
-import com.soywiz.korge.ui.*
+import com.soywiz.korge.input.onClick
+import com.soywiz.korge.input.onDown
+import com.soywiz.korge.input.onMouseDrag
+import com.soywiz.korge.input.onUpAnywhere
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.RGBA
-import com.soywiz.korim.font.readFont
-import com.soywiz.korim.text.TextAlignment
-import com.soywiz.korio.async.async
-import com.soywiz.korio.async.launch
-import com.soywiz.korio.file.std.resourcesVfs
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.job
 import scenes.exit_button
 import scenes.inventory
-import scenes.myFont
-import kotlin.coroutines.coroutineContext
 
 const val rows = 6
 const val cols = 5

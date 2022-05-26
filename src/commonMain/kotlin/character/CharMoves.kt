@@ -1,5 +1,6 @@
 package character
 
+import com.soywiz.korge.view.Sprite
 import com.soywiz.korge.view.SpriteAnimation
 import com.soywiz.korim.bitmap.Bitmap
 
@@ -7,7 +8,8 @@ enum class CharMoves {
     UP,
     DOWN,
     RIGHT,
-    LEFT;
+    LEFT,
+    STOP;
 
     lateinit var animation: SpriteAnimation
 }
@@ -52,4 +54,14 @@ fun initCharMoves(charSpriteMap: Bitmap) {
         columns = 9,
         rows = 1
     )
+}
+
+fun chooseAnimation(num: Int) : SpriteAnimation {
+    return when(num) {
+        0 -> CharMoves.UP.animation
+        1 -> CharMoves.DOWN.animation
+        2 -> CharMoves.RIGHT.animation
+        3 -> CharMoves.LEFT.animation
+        else -> CharMoves.UP.animation
+    }
 }

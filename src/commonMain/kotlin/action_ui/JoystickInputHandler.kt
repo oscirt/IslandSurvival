@@ -9,6 +9,10 @@ import com.soywiz.korge.baseview.BaseView
 import com.soywiz.korge.component.TouchComponent
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
+import com.soywiz.korio.async.launch
+import com.soywiz.korio.async.runBlockingNoJs
+import com.soywiz.korio.concurrent.atomic.incrementAndGet
+import com.soywiz.korio.dynamic.KDynamic.Companion.toInt
 import com.soywiz.korma.geom.Angle
 import com.soywiz.korma.geom.Point
 import com.soywiz.korma.geom.cos
@@ -16,9 +20,9 @@ import com.soywiz.korma.geom.sin
 import com.soywiz.korma.geom.vector.circle
 import inventory.ThingType
 import inventory.control
-import scenes.objects
-import scenes.tiledMapView
-import scenes.toolBar
+import io.ktor.websocket.*
+import scenes.*
+import serialization.Serialization
 import kotlin.math.hypot
 
 val padding = Point(21.75, 47.0)
@@ -29,7 +33,7 @@ var dy = 0.0
 const val speed = 1.0
 const val radius = 70.0
 
-var moveDirectory = DOWN
+//var moveDirection = DOWN
 
 fun Container.addJoystick(
     character: Character
@@ -68,7 +72,6 @@ fun Container.addJoystick(
         override val view: BaseView = view
         val start = Point(0, 0)
         var flag = false
-        var actBut = false
 
         override fun onTouchEvent(views: Views, e: TouchEvent) {
             if (control) {
@@ -104,7 +107,8 @@ fun Container.addJoystick(
                     for (i in objects.filter { it.type == ThingType.NPC }) {
                         if (i.sprite.collidesWith(character.solid)) {
                             i.sprite.removeFromParent()
-//                    objects.remove(i)
+                            if (isOnline) runBlockingNoJs { session.send(i.id.toString()) }
+//                            objects.remove(i)
                             toolBar.updateToolbar(i)
                             break
                         }
@@ -131,6 +135,7 @@ fun Container.addJoystick(
                             ball.position(0, 0)
                             ball.alpha = 0.2
                             dragging = false
+                            character.moveDirection = STOP
                             character.sprite.stopAnimation()
                             update(0.0, 0.0, view)
                         }
@@ -150,8 +155,8 @@ fun Container.addJoystick(
                                     UP.animation,
                                     100.milliseconds
                                 )
-                                if (moveDirectory != UP) {
-                                    moveDirectory = UP
+                                if (character.moveDirection != UP) {
+                                    character.moveDirection = UP
                                     character.solid.centerXOn(character)
                                     character.solid.alignTopToTopOf(character)
                                 }
@@ -160,8 +165,8 @@ fun Container.addJoystick(
                                     DOWN.animation,
                                     100.milliseconds
                                 )
-                                if (moveDirectory != DOWN) {
-                                    moveDirectory = DOWN
+                                if (character.moveDirection != DOWN) {
+                                    character.moveDirection = DOWN
                                     character.solid.centerXOn(character)
                                     character.solid.alignBottomToBottomOf(character)
                                 }
@@ -170,8 +175,8 @@ fun Container.addJoystick(
                                     RIGHT.animation,
                                     100.milliseconds
                                 )
-                                if (moveDirectory != RIGHT) {
-                                    moveDirectory = RIGHT
+                                if (character.moveDirection != RIGHT) {
+                                    character.moveDirection = RIGHT
                                     character.solid.centerYOn(character)
                                     character.solid.alignRightToRightOf(character)
                                 }
@@ -180,8 +185,8 @@ fun Container.addJoystick(
                                     LEFT.animation,
                                     100.milliseconds
                                 )
-                                if (moveDirectory != LEFT) {
-                                    moveDirectory = LEFT
+                                if (character.moveDirection != LEFT) {
+                                    character.moveDirection = LEFT
                                     character.solid.centerYOn(character)
                                     character.solid.alignLeftToLeftOf(character)
                                 }
@@ -214,6 +219,15 @@ fun move(container: Container) {
         container.moveWithHitTestable(tiledMapView, -(dx * scale) * speed, -(dy * scale) * speed)
         container.x -= padding.x
         container.y -= padding.y
+        if (isOnline) {
+            runBlockingNoJs {
+                session.send(
+                    Serialization.getJsonFromPoint(
+                        model.Point(characterName, container.x, container.y, container.moveDirection.ordinal)
+                    )
+                )
+            }
+        }
     } else {
         container.x += (dx * scale) * speed
         container.y += (dy * scale) * speed

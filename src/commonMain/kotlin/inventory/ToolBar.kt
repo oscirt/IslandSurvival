@@ -1,6 +1,5 @@
 package inventory
 
-import com.soywiz.korge.input.onClick
 import com.soywiz.korge.input.onDown
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
