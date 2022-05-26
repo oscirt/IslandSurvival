@@ -28,7 +28,6 @@ import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.util.collections.*
 import io.ktor.utils.io.core.*
 import io.ktor.websocket.*
 import model.Point
@@ -83,25 +82,27 @@ class AuthenticationScene : Scene() {
             }
         }
 
-        username = uiTextInput(width = views.virtualWidthDouble / 3)
-        password = uiTextInput(width = views.virtualWidthDouble / 3) {
-            y = username.height + authPadding
+        val cont = container {
+            username = uiTextInput(width = views.virtualWidthDouble / 3)
+            password = uiTextInput(width = views.virtualWidthDouble / 3) {
+                y = username.height + authPadding
 
+            }
+            loginButton = uiButton {
+                text = "Login"
+                alignTopToTopOf(password, username.height + authPadding)
+            }
+            signUpButton = uiButton {
+                text = "Sign Up"
+                alignRightToRightOf(password)
+                alignTopToTopOf(password, password.height + authPadding)
+            }
+            infoText = text("") {
+                alignTopToBottomOf(loginButton, authPadding)
+                alignLeftToLeftOf(loginButton)
+            }
         }
-        loginButton = uiButton {
-            text = "Login"
-            alignTopToTopOf(password, username.height + authPadding)
-        }
-        signUpButton = uiButton {
-            text = "Sign Up"
-            alignRightToRightOf(password)
-            alignTopToTopOf(password, password.height + authPadding)
-        }
-        infoText = text("") {
-            alignTopToBottomOf(loginButton, authPadding)
-            alignLeftToLeftOf(loginButton)
-        }
-        centerXOn(FixedSizeContainer(640.0, 360.0))
+        cont.centerXOn(this)
     }
 
     override suspend fun Container.sceneMain() {
@@ -135,25 +136,14 @@ class AuthenticationScene : Scene() {
                                                 val i = objects.find{ it.id == text.toInt()}!!
                                                 println(i)
                                                 i.sprite.removeFromParent()
-//                                                toolBar.updateToolbar(i)
                                                 continue
                                             }
                                             val receivedPoint = Serialization.getPointFromJson(text)
                                             if (playersContainer.containsKey(receivedPoint.name)) {
                                                 playersContainer[receivedPoint.name]!!.updateCharacter(receivedPoint)
-                                                if (receivedPoint.direction == 4) {
-                                                    playersContainer[receivedPoint.name]!!.sprite.stopAnimation()
-                                                } else {
-                                                    playersContainer[receivedPoint.name]!!.sprite.playAnimationLooped(
-                                                        chooseAnimation(receivedPoint.direction),
-                                                        100.milliseconds
-                                                    )
-                                                }
-                                            } else {
-                                                if (!needToAttach.contains(receivedPoint)) {
-                                                    println("Need to attach: $receivedPoint")
-                                                    needToAttach.push(receivedPoint)
-                                                }
+                                            } else if (!needToAttach.contains(receivedPoint)) {
+                                                println(needToAttach)
+                                                needToAttach.push(receivedPoint)
                                             }
                                         }
                                         is Frame.Close -> TODO()

@@ -8,19 +8,16 @@ import com.soywiz.korge.view.addTo
 import com.soywiz.korge.view.xy
 import com.soywiz.korio.concurrent.atomic.KorAtomicInt
 import com.soywiz.korio.concurrent.atomic.incrementAndGet
-import com.soywiz.korio.dynamic.KDynamic.Companion.toInt
 import com.soywiz.korma.geom.Point
 import inventory.Thing
 import inventory.ThingType
-import scenes.characterBitmap
-import scenes.inventoryBitmap
-import scenes.objects
-import scenes.tiledMap
+import scenes.*
 
-lateinit var startPosition: Point
+var startPosition: Point = Point(800, 800)
 var atomicInt = KorAtomicInt(0)
 
 fun readObjects() {
+    /*
     for (j in tiledMap.data.objectLayers.objects) {
         for ((key, value) in j.objectsByType) {
             when (key) {
@@ -59,7 +56,52 @@ fun readObjects() {
                     startPosition.x -= padding.x
                     startPosition.y -= padding.y
                 }
+                "wood" -> {
+                    startPosition = value.first().bounds.position
+                    startPosition.x -= padding.x
+                    startPosition.y -= padding.y
+
+                }
             }
+        }
+    }
+
+     */
+    for (j in tiledMap.data.objectLayers.objects) {
+        for ((key, value) in j.objectsByType) {
+            when(key){
+                "wood" -> {
+                    for (i in value.indices) {
+                        objects.add(
+                            Thing(
+                                Sprite(woodBitmap)
+                                    .xy(
+                                        value[i].x - padding.x,
+                                        value[i].y - padding.y
+                                    ),
+                                ThingType.WOOD,
+                                atomicInt.incrementAndGet()
+                            )
+                        )
+                    }
+                }
+                "stone" -> {
+                    for (i in value.indices) {
+                        objects.add(
+                            Thing(
+                                Sprite(stoneBitmap)
+                                    .xy(
+                                        value[i].x - padding.x,
+                                        value[i].y - padding.y
+                                    ),
+                                ThingType.STONE,
+                                atomicInt.incrementAndGet()
+                            )
+                        )
+                    }
+                }
+            }
+
         }
     }
 }
