@@ -1,21 +1,20 @@
 package scenes
 
 import com.soywiz.klock.seconds
-import com.soywiz.korev.MouseEvent
 import com.soywiz.korge.input.EventsDslMarker
 import com.soywiz.korge.input.MouseEvents
 import com.soywiz.korge.input.onClick
 import com.soywiz.korge.scene.MaskTransition
 import com.soywiz.korge.scene.Scene
-import com.soywiz.korge.scene.SceneContainer
 import com.soywiz.korge.view.*
 import com.soywiz.korge.view.filter.TransitionFilter
+import com.soywiz.korim.font.Font
 import com.soywiz.korim.font.readFont
 import com.soywiz.korim.format.readBitmap
 import com.soywiz.korio.file.std.resourcesVfs
 
 const val txtSize = 32.0
-const val fontName = "font.ttf"
+lateinit var myFont: Font
 
 object BackgroundMainMenu {
     const val src = "backgroundMainMenu.jpg"
@@ -34,11 +33,10 @@ object MainMenuLayout {
     const val rowGap = 20
 }
 
-class MainMenu() : Scene() {
+class MainMenu : Scene() {
 
     override suspend fun Container.sceneInit() {
-        val font = resourcesVfs[fontName].readFont()
-
+        myFont = resourcesVfs["font.ttf"].readFont()
         val backgroundImg = resourcesVfs[BackgroundMainMenu.src].readBitmap()
         image(backgroundImg) {
             scaledHeight = BackgroundMainMenu.Dimension.height
@@ -62,15 +60,37 @@ class MainMenu() : Scene() {
             })
 
             add(object: MainMenuItem {
+                override val text = "PLAY ONLINE"
+                override val onClick: suspend (it: MouseEvents) -> Unit = {
+                    sceneContainer.changeTo<AuthenticationScene>(
+                        transition = MaskTransition(
+                            transition = TransitionFilter.Transition.CIRCULAR,
+                            reversed = false,
+                            smooth = true,
+                            filtering = true
+                        ),
+                        time = 1.seconds
+                    )
+                }
+            })
+
+            add(object: MainMenuItem {
                 override val text = "OPTIONS"
                 override val onClick: @EventsDslMarker suspend (_: MouseEvents) -> Unit = {
-                    sceneContainer.pushTo<OptionScene>()
+                    sceneContainer.pushTo<OptionScene>(
+                        transition = MaskTransition(
+                            transition = TransitionFilter.Transition.CIRCULAR,
+                            reversed = false,
+                            smooth = true,
+                            filtering = true
+                        )
+                    )
                 }
             })
 
             add(object: MainMenuItem {
                 override val text = "EXIT"
-                override val onClick: @EventsDslMarker suspend (_: MouseEvents) -> Unit ={
+                override val onClick: @EventsDslMarker suspend (_: MouseEvents) -> Unit = {
                     views.gameWindow.close()
                 }
             })
@@ -78,7 +98,7 @@ class MainMenu() : Scene() {
 
         mainMenuItems.reversed().forEachIndexed { idx, it ->
             text(text = it.text) {
-                this.font = font
+                this.font = myFont
                 textSize = txtSize
                 onClick(it.onClick)
                 alignBottomToBottomOf(this@MainMenu.sceneContainer,  MainMenuLayout.padding + (this.height + MainMenuLayout.rowGap) * idx)

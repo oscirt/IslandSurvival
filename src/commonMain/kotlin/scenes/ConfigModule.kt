@@ -9,11 +9,12 @@ import kotlin.reflect.KClass
 object ConfigModule : Module() {
     override val size = SizeInt(640, 360)
     override val clipBorders = false
-    override val mainScene: KClass<out Scene> = GameScene::class
+    override val mainScene: KClass<out Scene> = MainMenu::class
 
     override suspend fun AsyncInjector.configure() {
         mapPrototype { MainMenu() }
         mapPrototype { GameScene() }
         mapPrototype { OptionScene() }
+        mapPrototype { AuthenticationScene() }
     }
 }

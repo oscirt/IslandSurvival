@@ -9,7 +9,7 @@ import com.soywiz.korge.view.*
 import com.soywiz.korim.font.readFont
 import com.soywiz.korio.file.std.resourcesVfs
 
-class OptionScene() : Scene() {
+class OptionScene : Scene() {
     override suspend fun Container.sceneInit() {
         val txt = text("THERE MUST BE OPTIONS") {
             font = resourcesVfs["font.ttf"].readFont()
@@ -19,7 +19,7 @@ class OptionScene() : Scene() {
 
         uiButton {
             text = "BACK"
-            textFont = resourcesVfs["font.ttf"].readFont()
+            textFont = myFont
             textSize = txtSize
             centerXOn(txt)
             alignTopToBottomOf(txt, 20)

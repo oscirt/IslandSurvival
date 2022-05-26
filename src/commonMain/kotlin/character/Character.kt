@@ -1,29 +1,35 @@
 package character
 
 import com.soywiz.korge.view.*
-import scenes.objects
+import model.Point
+import scenes.characterBitmap
+import player_data.startPosition
+import scenes.characterName
 
-class Character(
-    val sprite: Sprite,
-    scene: Container
-) : FixedSizeContainer() {
-    val localX: Int get() = (x / 32).toInt()
-    val localY: Int get() = (y / 32).toInt()
+class Character : FixedSizeContainer(width = 43.5, height = 67.5) {
+    val sprite = Sprite(characterBitmap).apply {
+        scaledWidth = 14.5
+        scaledHeight = 22.5
+        addTo(this@Character)
+        centerOn(this@Character)
+    }
+    val solid = solidRect(sprite.scaledWidth, sprite.scaledHeight)
+        .alpha(0)
+        .centerXOn(this)
+        .addTo(this)
+    val txt = text(characterName).apply {
+        alignTopToTopOf(sprite, -14.5)
+        centerXOn(sprite)
+    }
 
+    fun updateCharacter(point: Point) {
+        x = point.x
+        y = point.y
+    }
+
+    var moveDirection = CharMoves.DOWN
+    
     init {
-        sprite.apply {
-            scaledHeight = 32.0
-            scaledWidth = 32.0
-            addTo(this@Character)
-            centerOn(this@Character)
-        }
-        x += 1600 + 320
-        y += 1600 + 180
-        scene.addChild(this)
-        solidRect(width, height).alpha(0.3)
-        addUpdater {
-            println("$x/$y\t${sprite.x}/${sprite.y}")
-//            if (collidesWith(objects[0].type.img)) println("$x/$y\n${objects[0].type.img.x}/${objects[0].type.img.y}")
-        }
+        xy(startPosition)
     }
 }
