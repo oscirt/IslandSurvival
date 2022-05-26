@@ -9,7 +9,6 @@ import com.soywiz.korge.view.xy
 import com.soywiz.korio.concurrent.atomic.KorAtomicInt
 import com.soywiz.korio.concurrent.atomic.incrementAndGet
 import com.soywiz.korma.geom.Point
-import enemy.Wolf
 import inventory.Thing
 import inventory.ThingType
 import scenes.*
@@ -75,7 +74,7 @@ fun readObjects() {
                     for (i in value.indices) {
                         objects.add(
                             Thing(
-                                Sprite(wood)
+                                Sprite(woodBitmap)
                                     .xy(
                                         value[i].x - padding.x,
                                         value[i].y - padding.y
@@ -90,7 +89,7 @@ fun readObjects() {
                     for (i in value.indices) {
                         objects.add(
                             Thing(
-                                Sprite(stone)
+                                Sprite(stoneBitmap)
                                     .xy(
                                         value[i].x - padding.x,
                                         value[i].y - padding.y

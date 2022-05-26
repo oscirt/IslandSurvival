@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.5" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="14">
+<map version="1.8" tiledversion="1.8.4" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="14">
  <tileset firstgid="1" source="BeautifullTileset.tsx"/>
  <layer id="2" name="island" width="50" height="50">
   <data encoding="csv">
@@ -163,6 +163,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="6" name="characters"/>
  <objectgroup id="5" name="object_l1">
   <object id="2" name="wood" type="wood" x="939.667" y="814.167">
    <point/>
@@ -195,5 +196,4 @@
    <point/>
   </object>
  </objectgroup>
- <objectgroup id="6" name="characters"/>
 </map>

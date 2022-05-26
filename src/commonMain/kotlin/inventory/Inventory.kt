@@ -18,9 +18,11 @@ class Inventory(
     container: Container
 ) : Container() {
     var items = arrayListOf<ArrayList<InventoryCell>>()
-    var craftLeftThing: Thing? = null;
-    var craftRightThing: Thing? = null;
-    var craftResThing: Thing? = null;
+    var craftLeftThing: Thing? = null
+    var craftRightThing: Thing? = null
+    var craftResultThing: Thing? = null
+    var flag = false
+    var isResult = false
     var isPressed = false
     var dragging = false
     var point: Point? = null
@@ -48,6 +50,7 @@ class Inventory(
                         dragging = false
                     }
                     onMouseDrag {
+                        flag = false
                         if (!dragging && point != null) {
                             items[i][j].thing?.sprite?.centerOn(this@roundRect)
                         } else if (items[i][j].thing != null) {
@@ -66,26 +69,24 @@ class Inventory(
             y = (2 * (inventoryCellSize + 10)) + inventoryBackground.y - 10
 
             onUp {
-                if(point != null && craftLeftThing == null) {
+                println("Right: $point/$craftLeftThing/$flag")
+                if(point != null && craftLeftThing == null && !flag) {
                     craftLeftThing = items[point!!.x.toInt()][point!!.y.toInt()].thing
-                    craftLeftThing!!.sprite.centerOn(this)
-                    items[point!!.x.toInt()][point!!.y.toInt()].thing = null
+                    if (craftLeftThing != null) {
+                        craftLeftThing!!.sprite.centerOn(this)
+                        items[point!!.x.toInt()][point!!.y.toInt()].thing = null
+                        flag = false
+                    }
                 }
             }
 
             onClick {
                 if (craftLeftThing != null) {
                     updateInventory(craftLeftThing!!)
+                    craftLeftThing = null
+                    flag = true
                 }
             }
-//            onDown {
-//                alpha(0.5)
-//                dragging = true
-//            }
-//            onUpAnywhere {
-//                alpha(1)
-//                dragging = false
-//            }
         }
         roundRect(inventoryCellSize, inventoryCellSize, 15.0) {
             color = RGBA(139, 139, 139)
@@ -93,33 +94,58 @@ class Inventory(
             y = (2 * (inventoryCellSize + 10)) + inventoryBackground.y - 10
 
             onUp {
-                if(point != null && craftRightThing != null){
-                    craftLeftThing = items[point!!.x.toInt()][point!!.y.toInt()].thing
-                    craftLeftThing!!.sprite.centerOn(this)
-                    items[point!!.x.toInt()][point!!.y.toInt()].thing = null
+                println("Left: $point/$craftRightThing/$flag")
+                if(point != null && craftRightThing == null && !flag){
+                    craftRightThing = items[point!!.x.toInt()][point!!.y.toInt()].thing
+                    if (craftRightThing != null) {
+                        craftRightThing!!.sprite.centerOn(this)
+                        items[point!!.x.toInt()][point!!.y.toInt()].thing = null
+                        flag = false
+                    }
                 }
             }
 
             onClick {
                 if (craftRightThing != null) {
                     updateInventory(craftRightThing!!)
+                    craftRightThing = null
+                    flag = true
                 }
             }
-
-//            onDown {
-//                alpha(0.5)
-//                dragging = true
-//            }
-//            onUpAnywhere {
-//                alpha(1)
-//                dragging = false
-//            }
         }
 
         val craftRect = roundRect(inventoryCellSize, inventoryCellSize, 15.0) {
             color = RGBA(100, 150, 100, 255)
             x = ((cols + 1) * ((inventoryCellSize+10) + 5)) + inventoryBackground.x
             y = (3 * (inventoryCellSize + 10)) + inventoryBackground.y - 10
+
+            addUpdater {
+                if (craftLeftThing != null && craftRightThing != null && isResult) {
+                    craftResultThing = craft(craftLeftThing!!, craftRightThing!!)
+                    if (craftResultThing != null) {
+                        craftResultThing!!.sprite.centerOn(this)
+                    }
+                    isResult = false
+                } else if (craftLeftThing == null || craftRightThing == null) {
+                    isResult = true
+                    if (craftResultThing != null) {
+                        craftResultThing!!.sprite.removeFromParent()
+                        craftResultThing = null
+                    }
+                }
+            }
+
+            onClick {
+                if (craftResultThing != null) {
+                    updateInventory(craftResultThing!!)
+                    craftResultThing = null
+                    craftLeftThing!!.sprite.removeFromParent()
+                    craftLeftThing = null
+                    craftRightThing!!.sprite.removeFromParent()
+                    craftRightThing = null
+                }
+            }
+
             onDown {
                 alpha(0.5)
                 dragging = true
@@ -127,11 +153,6 @@ class Inventory(
             onUpAnywhere {
                 alpha(1)
                 dragging = false
-            }
-            addUpdater {
-                if (craftRightThing != null && craftRightThing != null) {
-                    craft(craftLeftThing!!, craftRightThing!!)
-                }
             }
         }
         text("CRAFT", txtSize, RGBA(50, 50, 50), myFont) {
@@ -157,7 +178,7 @@ class Inventory(
         for (i in 0 until rows) {
             for (j in 0 until cols) {
                 if (items[i][j].thing == null) {
-                    println("$rows|$cols|$i|$j")
+//                    println("$rows|$cols|$i|$j")
                     return i * cols + j
                 }
             }
@@ -165,11 +186,13 @@ class Inventory(
         return -1
     }
 
-    fun updateInventory(thing: Thing) {
+    fun updateInventory(thing: Thing) : Boolean {
         val index = getFreeCellIndex()
+        if (index == -1) return false
         val row = index / cols
         val col = index % cols
         items[row][col].thing = thing
         thing.sprite.addTo(this).centerOn(items[row][col].rect)
+        return true
     }
 }

@@ -142,6 +142,7 @@ class AuthenticationScene : Scene() {
                                             if (playersContainer.containsKey(receivedPoint.name)) {
                                                 playersContainer[receivedPoint.name]!!.updateCharacter(receivedPoint)
                                             } else if (!needToAttach.contains(receivedPoint)) {
+                                                println(needToAttach)
                                                 needToAttach.push(receivedPoint)
                                             }
                                         }

@@ -23,14 +23,12 @@ import com.soywiz.korio.file.std.resourcesVfs
 import com.soywiz.korio.serialization.xml.Xml
 import com.soywiz.korio.serialization.xml.readXml
 import com.soywiz.korma.geom.RectangleInt
-import enemy.Wolf
 import enemy.initWolfMoves
 import inventory.Inventory
 import inventory.Thing
 import inventory.ToolBar
 import player_data.attachObjectsTo
 import player_data.readObjects
-import player_data.startPosition
 
 lateinit var charactersLayer: Container
 lateinit var inventory: Inventory
@@ -44,10 +42,10 @@ lateinit var characterBitmap: Bitmap
 lateinit var wolfBitmap: Bitmap
 lateinit var inventoryBitmap: Bitmap
 lateinit var exit_button: Bitmap
-lateinit var wood: Bitmap
-lateinit var stone: Bitmap
-lateinit var board: Bitmap
-lateinit var knife: Bitmap
+lateinit var woodBitmap: Bitmap
+lateinit var stoneBitmap: Bitmap
+lateinit var boardBitmap: Bitmap
+lateinit var knifeBitmap: Bitmap
 lateinit var objects: ArrayList<Thing>
 lateinit var xml: Xml
 
@@ -67,10 +65,10 @@ class GameScene : Scene() {
         characterBitmap = resourcesVfs["person.png"].readBitmap()
         initCharMoves(characterBitmap)
         characterBitmap = characterBitmap.slice(RectangleInt(17, 15, 29, 45)).extract()
-        wood = resourcesVfs["wood.png"].readBitmap()
-        stone = resourcesVfs["stone.png"].readBitmap()
-        board = resourcesVfs["board.png"].readBitmap()
-        knife = resourcesVfs["knife.png"].readBitmap()
+        woodBitmap = resourcesVfs["wood.png"].readBitmap()
+        stoneBitmap = resourcesVfs["stone.png"].readBitmap()
+        boardBitmap = resourcesVfs["board.png"].readBitmap()
+        knifeBitmap = resourcesVfs["knife.png"].readBitmap()
         initCharMoves(resourcesVfs["person.png"].readBitmap())
         tiledMap = resourcesVfs["Island.tmx"].readTiledMap()
         inventoryBitmap = resourcesVfs["inventory.png"].readBitmap()
@@ -82,7 +80,7 @@ class GameScene : Scene() {
         readObjects()
 
         charactersLayer = tiledMapView["characters"].first as Container
-        charactersLayer.keepChildrenSortedByY()
+//        charactersLayer.keepChildrenSortedByY()
 
         xml = resourcesVfs["Island.tmx"].readXml()
 
@@ -92,6 +90,8 @@ class GameScene : Scene() {
     override suspend fun Container.sceneMain() {
 //        println("${xml.child("objectgroup")?.allNodeChildren?.filter{ it.attributes["name"] == "start" }?.first()?.attributes}")
 
+        attachObjectsTo(charactersLayer)
+
         val character = Character()
         charactersLayer.addChild(character)
 
@@ -99,7 +99,6 @@ class GameScene : Scene() {
 
         healthBar = HealthBar(this)
 
-        attachObjectsTo(charactersLayer)
 
         addJoystick(character)
 
@@ -107,8 +106,8 @@ class GameScene : Scene() {
 
         toolBar = ToolBar(inventory, this)
 
-        val wolf = Wolf(wolfBitmap, startPosition.x, startPosition.y)
-        charactersLayer.addChild(wolf)
+//        val wolf = Wolf(wolfBitmap, startPosition.x, startPosition.y)
+//        charactersLayer.addChild(wolf)
 
         addUpdater {
             if (needToAttach.isNotEmpty() && isOnline) {
