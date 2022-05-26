@@ -1,50 +1,54 @@
 package inventory
 
-import com.soywiz.korge.input.onClick
-import com.soywiz.korge.input.onDown
-import com.soywiz.korge.input.onMouseDrag
-import com.soywiz.korge.input.onUpAnywhere
+import com.soywiz.korge.input.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.RGBA
+import com.soywiz.korma.geom.Point
 import scenes.exit_button
 import scenes.inventory
+import scenes.myFont
+import scenes.txtSize
 
 const val rows = 6
 const val cols = 5
-var inventoryCell = 0.0
-
+var inventoryCellSize = 0.0
 var control = true
 
 class Inventory(
     container: Container
 ) : Container() {
     var items = arrayListOf<ArrayList<InventoryCell>>()
+    var craftLeftThing: Thing? = null;
+    var craftRightThing: Thing? = null;
+    var craftResThing: Thing? = null;
     var isPressed = false
     var dragging = false
+    var point: Point? = null
 
     init {
-        inventoryCell = (container.height - 20) / rows
+        inventoryCellSize = (container.height - 20) / rows
         val inventoryBackground = solidRect(container.width, container.height).apply {
-            color = RGBA(198, 198, 198)
+            color = RGBA(100, 100, 100)
             centerOn(container)
         }
         for (i in 0 until rows) {
             items.add(arrayListOf())
             for (j in 0 until cols) {
-                items[i].add(InventoryCell(rect = roundRect(inventoryCell, inventoryCell, 15.0) {
+                items[i].add(InventoryCell(rect = roundRect(inventoryCellSize, inventoryCellSize, 15.0) {
                     color = RGBA(139, 139, 139, 255)
-                    x += (j * inventoryCell) + inventoryBackground.x + 10
-                    y += (i * inventoryCell) + inventoryBackground.y + 10
+                    x += (j * inventoryCellSize) + inventoryBackground.x + 10
+                    y += (i * inventoryCellSize) + inventoryBackground.y + 10
                     onDown {
                         alpha(0.5)
                         dragging = true
+                        point = Point(i, j)
                     }
                     onUpAnywhere {
                         alpha(1)
                         dragging = false
                     }
                     onMouseDrag {
-                        if (!dragging) {
+                        if (!dragging && point != null) {
                             items[i][j].thing?.sprite?.centerOn(this@roundRect)
                         } else if (items[i][j].thing != null) {
                             isPressed = true
@@ -54,6 +58,89 @@ class Inventory(
                     }
                 }))
             }
+        }
+
+        roundRect(inventoryCellSize, inventoryCellSize, 15.0) {
+            color = RGBA(139, 139, 139)
+            x = ((cols + 2) * ((inventoryCellSize+10) + 5)) + inventoryBackground.x
+            y = (2 * (inventoryCellSize + 10)) + inventoryBackground.y - 10
+
+            onUp {
+                if(point != null && craftLeftThing == null) {
+                    craftLeftThing = items[point!!.x.toInt()][point!!.y.toInt()].thing
+                    craftLeftThing!!.sprite.centerOn(this)
+                    items[point!!.x.toInt()][point!!.y.toInt()].thing = null
+                }
+            }
+
+            onClick {
+                if (craftLeftThing != null) {
+                    updateInventory(craftLeftThing!!)
+                }
+            }
+//            onDown {
+//                alpha(0.5)
+//                dragging = true
+//            }
+//            onUpAnywhere {
+//                alpha(1)
+//                dragging = false
+//            }
+        }
+        roundRect(inventoryCellSize, inventoryCellSize, 15.0) {
+            color = RGBA(139, 139, 139)
+            x = (cols * ((inventoryCellSize+10) + 5)) + inventoryBackground.x
+            y = (2 * (inventoryCellSize + 10)) + inventoryBackground.y - 10
+
+            onUp {
+                if(point != null && craftRightThing != null){
+                    craftLeftThing = items[point!!.x.toInt()][point!!.y.toInt()].thing
+                    craftLeftThing!!.sprite.centerOn(this)
+                    items[point!!.x.toInt()][point!!.y.toInt()].thing = null
+                }
+            }
+
+            onClick {
+                if (craftRightThing != null) {
+                    updateInventory(craftRightThing!!)
+                }
+            }
+
+//            onDown {
+//                alpha(0.5)
+//                dragging = true
+//            }
+//            onUpAnywhere {
+//                alpha(1)
+//                dragging = false
+//            }
+        }
+
+        val craftRect = roundRect(inventoryCellSize, inventoryCellSize, 15.0) {
+            color = RGBA(100, 150, 100, 255)
+            x = ((cols + 1) * ((inventoryCellSize+10) + 5)) + inventoryBackground.x
+            y = (3 * (inventoryCellSize + 10)) + inventoryBackground.y - 10
+            onDown {
+                alpha(0.5)
+                dragging = true
+            }
+            onUpAnywhere {
+                alpha(1)
+                dragging = false
+            }
+            addUpdater {
+                if (craftRightThing != null && craftRightThing != null) {
+                    craft(craftLeftThing!!, craftRightThing!!)
+                }
+            }
+        }
+        text("CRAFT", txtSize, RGBA(50, 50, 50), myFont) {
+            centerXOn(craftRect)
+            alignBottomToTopOf(craftRect, inventoryCellSize * 1.5)
+        }
+        text("+", txtSize * 2, RGBA(50, 50, 50), myFont) {
+            centerXOn(craftRect)
+            alignBottomToTopOf(craftRect)
         }
 
         sprite(exit_button) {

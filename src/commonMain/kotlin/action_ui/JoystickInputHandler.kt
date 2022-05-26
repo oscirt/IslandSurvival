@@ -104,7 +104,7 @@ fun Container.addJoystick(
 
                 if (actionButton.hitTestAny(pxRight, pyRight)) {
                     actionButton.alpha(0.2)
-                    for (i in objects.filter { it.type == ThingType.NPC }) {
+                    for (i in objects.filter { it.type != ThingType.NPC }) {
                         if (i.sprite.collidesWith(character.solid)) {
                             i.sprite.removeFromParent()
                             if (isOnline) runBlockingNoJs { session.send(i.id.toString()) }

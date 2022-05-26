@@ -37,7 +37,7 @@ korge {
 	targetIos()
 	targetAndroidIndirect() // targetAndroidDirect()
 
-	serializationJson()
+  serializationJson()
 
 	val ktor_version = "2.0.0"
 	project.dependencies.add("commonMainApi", "ch.qos.logback:logback-classic:1.2.3")

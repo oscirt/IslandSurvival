@@ -44,7 +44,10 @@ lateinit var characterBitmap: Bitmap
 lateinit var wolfBitmap: Bitmap
 lateinit var inventoryBitmap: Bitmap
 lateinit var exit_button: Bitmap
-
+lateinit var wood: Bitmap
+lateinit var stone: Bitmap
+lateinit var board: Bitmap
+lateinit var knife: Bitmap
 lateinit var objects: ArrayList<Thing>
 lateinit var xml: Xml
 
@@ -64,6 +67,11 @@ class GameScene : Scene() {
         characterBitmap = resourcesVfs["person.png"].readBitmap()
         initCharMoves(characterBitmap)
         characterBitmap = characterBitmap.slice(RectangleInt(17, 15, 29, 45)).extract()
+        wood = resourcesVfs["wood.png"].readBitmap()
+        stone = resourcesVfs["stone.png"].readBitmap()
+        board = resourcesVfs["board.png"].readBitmap()
+        knife = resourcesVfs["knife.png"].readBitmap()
+        initCharMoves(resourcesVfs["person.png"].readBitmap())
         tiledMap = resourcesVfs["Island.tmx"].readTiledMap()
         inventoryBitmap = resourcesVfs["inventory.png"].readBitmap()
 
